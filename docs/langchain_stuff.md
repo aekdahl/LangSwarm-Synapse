@@ -151,3 +151,11 @@ LangSwarm’s integration with LangChain enhances workflows by:
 4. Enabling dynamic routing for flexible task management.
 
 This integration empowers developers to build powerful and adaptable multi-agent systems while leveraging the best features of both LangSwarm and LangChain.
+
+---
+
+Why Chains are Useful
+Deeper Integration: Chains enable LangSwarm workflows to fit seamlessly into LangChain pipelines.
+Customization: Users can combine LangSwarm classes with LangChain tools, memory, and agents in complex workflows.
+Reusability: Chains are reusable across multiple pipelines, reducing redundant setup.
+This design ensures that LangSwarm integrates fully with LangChain, offering both modular tools and customizable chains.
