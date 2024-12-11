@@ -1,38 +1,4 @@
-## Explanation of Features
 
-### Custom and Pretrained Models:
-
-The HuggingFaceLLM class allows users to specify any model available on the Hugging Face Hub (e.g., "bert-base-uncased", "distilbert-base-uncased").
-
-### Task Flexibility:
-
-Supports various tasks like "text-classification", "summarization", "question-answering", "translation", etc., using Hugging Face's pipeline.
-
-### Seamless Integration:
-
-The evaluate method serves as a unified interface for querying the Hugging Face model, enabling easy integration into LangSwarm workflows.
-
----
-
-## Key Features of the Updated Implementation
-
-### Inheritance from LLM:
-
-The HuggingFaceLLM class inherits from the LLM base class, ensuring compatibility with the Swarm classes and their .chat()-based workflows.
-
-### Seamless .chat() Integration:
-
-Implements the .chat() method to process queries using the Hugging Face pipeline, making it compatible with existing LangSwarm workflows.
-
-### Flexible Task Handling:
-
-Supports multiple tasks (e.g., text-classification, summarization) by adjusting how the response is formatted.
-
-### Memory Management:
-
-Integrates the memory mechanisms (reset, set_query, add_response) from the LLM base class.
-
----
 
 # Next Steps
 Expand Supported Tasks: Add specific handling for tasks like summarization or translation.
