@@ -33,7 +33,7 @@ pip install langswarm
 ```python
 # Example: Consensus Workflow with LangSwarm
 
-from langswarm import LLMConsensus, LLMVoting
+from langswarm import LLMConsensus
 
 # Mock LLM agents
 class AgentA:
