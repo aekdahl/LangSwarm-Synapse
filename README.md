@@ -67,6 +67,10 @@ LangSwarm is open source, and we welcome contributions! To get started:
 ## License
 LangSwarm is released under the MIT License. See LICENSE for details.
 
+## Acknowledgments
+- LangChain
+- OpenAI
+
 ## Stay Connected
 - **Issues**: Report bugs or request features in the issue tracker.
 - **Discussions**: Join the conversation in the discussions tab.
