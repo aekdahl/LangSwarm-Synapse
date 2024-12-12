@@ -10,7 +10,7 @@ module.exports = {
       'classic',
       {
         docs: {
-          routeBasePath: '/',
+          routeBasePath: '/docs',
         },
       },
     ],
