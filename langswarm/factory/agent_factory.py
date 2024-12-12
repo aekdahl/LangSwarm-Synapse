@@ -7,7 +7,7 @@ class AgentFactory:
     """
 
     @staticmethod
-    def create_agent(agent, **kwargs):
+    def wrap_agent(name, agent, **kwargs):
         """
         Create a compatible LangSwarm agent.
 
@@ -19,4 +19,4 @@ class AgentFactory:
         - LLM-compatible wrapped agent.
         """
         # Use the GenericAgentWrapper for most agents
-        return AgentWrapper(agent=agent, **kwargs)
+        return AgentWrapper(name, agent, **kwargs)
