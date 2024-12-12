@@ -2,7 +2,7 @@ module.exports = {
   title: 'LangSwarm Docs',
   tagline: 'Documentation for LangSwarm',
   url: 'https://aekdahl.github.io',
-  baseUrl: '/LangSwarm/',
+  baseUrl: '/',
   organizationName: 'aekdahl',
   projectName: 'LangSwarm',
   presets: [
@@ -10,7 +10,7 @@ module.exports = {
       'classic',
       {
         docs: {
-          routeBasePath: '/docs',
+          routeBasePath: '/',
         },
       },
     ],
