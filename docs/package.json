@@ -6,7 +6,7 @@
     "build": "docusaurus build"
   },
   "dependencies": {
-    "@docusaurus/core": "^latest",
-    "@docusaurus/preset-classic": "^latest"
+    "@docusaurus/core": "latest",
+    "@docusaurus/preset-classic": "latest"
   }
 }
