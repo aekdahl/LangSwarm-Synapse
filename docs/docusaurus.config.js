@@ -12,6 +12,7 @@ module.exports = {
       {
         docs: {
           routeBasePath: '/',
+          path: './docs',
         },
       },
     ],
