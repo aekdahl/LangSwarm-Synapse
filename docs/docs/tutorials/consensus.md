@@ -1,5 +1,5 @@
 ---
-title: Tutorial: Using **LangSwarm LLMConsensus** with LangChain for Multi-LLM Collaboration
+title: Using LangSwarm LLMConsensus with LangChain for Multi-LLM Collaboration
 ---
 
 ### Using **LangSwarm LLMConsensus** with LangChain for Multi-LLM Collaboration
