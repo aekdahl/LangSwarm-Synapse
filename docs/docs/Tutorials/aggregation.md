@@ -1,10 +1,10 @@
 ---
-title: Using LangSwarm LLMAggregation with a LangChain Pipeline
-sidebar_label: Aggregation with LangChain Pipelines
-sidebar_position: 0
+title: Aggregation with LangChain
+sidebar_label: Aggregation with LangChain
+sidebar_position: 100
 ---
 
-# Tutorial: Using LangSwarm LLMAggregation with a LangChain Pipeline
+# Aggregation with LangChain
 
 This tutorial demonstrates how to use **LangSwarm's LLMAggregation** with LangChain in a complete pipeline. By leveraging LangSwarm’s LangChain-compatible tools, we can integrate pre- and post-processing steps seamlessly into LangChain’s infrastructure while aggregating outputs from multiple agents.
 
