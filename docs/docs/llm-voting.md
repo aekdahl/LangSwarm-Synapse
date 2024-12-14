@@ -1,9 +1,9 @@
 ---
-title: LLMVoting
-sidebar_position: 65
+title: Multi-Agent Voting
+sidebar_position: 5
 ---
 
-# **LLMVoting**
+# Multi-Agent Voting
 
 ## **Overview**
 
