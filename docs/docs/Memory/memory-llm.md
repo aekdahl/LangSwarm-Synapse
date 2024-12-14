@@ -3,8 +3,7 @@ title: LangSwarmMemoryLLM
 sidebar_position: 70
 ---
 
-# Documentation for `LangSwarmMemoryLLM` Class
-
+# LangSwarmMemoryLLM
 ---
 
 ## **Overview**
