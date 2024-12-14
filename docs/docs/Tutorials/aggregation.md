@@ -1,5 +1,7 @@
 ---
 title: Using LangSwarm LLMAggregation with a LangChain Pipeline
+sidebar_label: Aggregation with LangChain Pipelines
+sidebar_position: 0
 ---
 
 # Tutorial: Using LangSwarm LLMAggregation with a LangChain Pipeline
