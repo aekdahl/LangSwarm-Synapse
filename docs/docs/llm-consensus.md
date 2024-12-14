@@ -1,9 +1,9 @@
 ---
-title: LLMConsensus
-sidebar_position: 63
+title: Collaborative Decision-Making
+sidebar_position: 3
 ---
 
-# **LLMConsensus**
+# Collaborative Decision-Making
 
 ## **Overview**
 

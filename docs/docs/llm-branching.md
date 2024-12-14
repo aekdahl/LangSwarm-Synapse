@@ -1,9 +1,9 @@
 ---
-title: LLMBranching
-sidebar_position: 62
+title: Diverse Output Generation
+sidebar_position: 2
 ---
 
-# **LLMBranching**
+# Diverse Output Generation
 
 ## **Overview**
 
