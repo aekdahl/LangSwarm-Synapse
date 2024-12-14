@@ -1,8 +1,9 @@
 ---
 title: Bring Your Own Agent
+sidebar_position: 1
 ---
 
-# **Bring Your Own Agent with LangSwarm**
+# Bring Your Own Agent
 
 LangSwarm empowers users to seamlessly integrate their own agents or models into LangSwarm’s ecosystem, leveraging its powerful orchestration features such as consensus, aggregation, and voting. After using LangSwarm, you can continue processing results in your platform of choice, such as LangChain, Hugging Face, or OpenAI.
 

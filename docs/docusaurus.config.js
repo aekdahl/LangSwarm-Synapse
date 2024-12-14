@@ -14,6 +14,9 @@ module.exports = {
           routeBasePath: '/',
           path: './docs',
         },
+        theme: {
+          customCss: require.resolve('./src/css/custom.css'),
+        },
       },
     ],
   ],

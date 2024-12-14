@@ -1,14 +1,16 @@
 ---
-title: Using LangSwarm LLMConsensus with LangChain for Multi-LLM Collaboration
+title: Consensus with LangChain
+sidebar_label: Consensus with LangChain
+sidebar_position: 102
 ---
 
-### Using **LangSwarm LLMConsensus** with LangChain for Multi-LLM Collaboration
+# Consensus with LangChain
 
 This tutorial demonstrates how to use **LangSwarm**'s `LLMConsensus` within a LangChain workflow to create a multi-LLM solution. The workflow combines multiple language models to achieve a consensus on a query and integrates this capability seamlessly into LangChain.
 
 ---
 
-### **Prerequisites**
+## **Prerequisites**
 
 Before we begin, ensure you have the following installed:
 
@@ -18,7 +20,7 @@ pip install langswarm langchain langchain-openai transformers
 
 ---
 
-### **Overview**
+## **Overview**
 
 We will:
 1. Define multiple agents using LangSwarm.
@@ -100,9 +102,9 @@ print(summary)
 
 ---
 
-### **Code Walkthrough**
+## **Code Walkthrough**
 
-#### **Step 1: Define Agents**
+### **Step 1: Define Agents**
 We define three agents (`agent1`, `agent2`, `agent3`) using LangSwarm's `OpenAIAgent`. Each agent queries a different OpenAI model, simulating a multi-agent collaboration.
 
 ```python
@@ -113,7 +115,7 @@ agent3 = OpenAIAgent(api_key="your_openai_api_key", model="gpt-3.5-turbo-instruc
 
 ---
 
-#### **Step 2: Achieve Consensus**
+### **Step 2: Achieve Consensus**
 We use `LLMConsensus` to determine a unified response to a query. The `LLMConsensus` class compares the outputs of all agents and selects the most agreed-upon response.
 
 ```python
@@ -125,7 +127,7 @@ print("Consensus Response:", consensus_response)
 
 ---
 
-#### **Step 3: Integrate with LangChain**
+### **Step 3: Integrate with LangChain**
 The consensus response is passed to a LangChain `LLMChain` for further processing. This demonstrates how LangSwarm can be seamlessly integrated into LangChain workflows.
 
 ```python
@@ -142,7 +144,7 @@ print(summary)
 
 ---
 
-### **Expected Output**
+## **Expected Output**
 
 ```plaintext
 Consensus Response: The key causes of climate change include greenhouse gas emissions from burning fossil fuels, deforestation, and industrial activities.
@@ -153,7 +155,7 @@ To address climate change, key solutions include transitioning to renewable ener
 
 ---
 
-### **Why This is Powerful**
+## **Why This is Powerful**
 
 1. **Collaboration Across Models:**
    - Use multiple models collaboratively to generate robust and validated outputs.
@@ -166,7 +168,7 @@ To address climate change, key solutions include transitioning to renewable ener
 
 ---
 
-### **Next Steps**
+## **Next Steps**
 1. Experiment with additional Swarm classes like `LLMAggregation` or `LLMBranching`.
 2. Use LangChain's memory systems with LangSwarm agents for enhanced context tracking.
 3. Add more agents (e.g., Hugging Face models) to diversify the collaboration.
