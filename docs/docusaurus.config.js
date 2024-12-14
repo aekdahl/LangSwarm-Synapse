@@ -23,13 +23,9 @@ module.exports = {
   themeConfig: {
     navbar: {
       title: 'LangSwarm',
-      logo: {
-        alt: 'My Site Logo',
-        src: 'img/logo.svg',
-      },
       items: [
         { to: 'docs/getting-started', label: 'Docs', position: 'left' },
-        { href: 'https://github.com/<your-username>/<repository-name>', label: 'GitHub', position: 'right' },
+        { href: 'https://github.com/aekdahl/LangSwarm', label: 'GitHub', position: 'right' },
       ],
     },
   }
