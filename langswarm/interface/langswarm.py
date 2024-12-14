@@ -6,7 +6,7 @@ class LangSwarm:
     """
 
     @staticmethod
-    def create_pipeline(workflow, agents, **kwargs):
+    def create(workflow, agents, **kwargs):
         """
         Create a LangSwarm pipeline based on the specified workflow.
 
