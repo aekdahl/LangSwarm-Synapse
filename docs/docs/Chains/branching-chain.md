@@ -3,7 +3,7 @@ title: BranchingChain
 sidebar_position: 31
 ---
 
-# Documentation for `BranchingChain` Class
+# BranchingChain
 
 ---
 
