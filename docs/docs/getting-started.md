@@ -2,6 +2,7 @@
 id: getting-started
 title: Getting Started with LangSwarm
 slug: /
+sidebar_position: 0
 ---
 
 ### **Getting Started with LangSwarm**
