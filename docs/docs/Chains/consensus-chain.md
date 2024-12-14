@@ -3,7 +3,7 @@ title: ConsensusChain
 sidebar_position: 32
 ---
 
-# Documentation for `ConsensusChain` Class
+# ConsensusChain
 
 ---
 
