@@ -1,9 +1,9 @@
 ---
-title: LLMAggregation
-sidebar_position: 61
+title: Multi-Agent Aggregation
+sidebar_position: 1
 ---
 
-# **LLMAggregation**
+# Multi-Agent Aggregation
 
 ## **Overview**
 
