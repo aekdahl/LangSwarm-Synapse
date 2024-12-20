@@ -46,7 +46,6 @@ class AgentWrapper(LLM):
         super().__init__(**kwargs)
 
         self.name = name
-        self.in_memory = []
         self.agent = self._wrap_agent(agent, langsmith_api_key)
         self.memory = self._initialize_memory(memory)
         self.is_conversational = is_conversational
