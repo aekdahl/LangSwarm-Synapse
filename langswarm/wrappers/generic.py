@@ -3,8 +3,11 @@ from typing import Any, Optional
 
 try:
     from langchain.memory import BaseMemory
+    from langchain.memory import ConversationBufferMemory, RedisChatMessageHistory
 except ImportError:
     BaseMemory = None  # Fallback if BaseMemory is not available
+    ConversationBufferMemory = None
+    RedisChatMessageHistory = None
 
 try:
     from langsmith.tracers.helpers import traceable, log_error
@@ -22,7 +25,7 @@ from ..bot import LLM
 class AgentWrapper(LLM):
     """
     A unified wrapper for LLM agents, LangChain chains, Hugging Face models, and OpenAI LLMs.
-    Supports optional LangSmith logging and shared memory integration.
+    Supports LangSmith logging, shared memory, and error handling.
     """
 
     def __init__(self, name, agent, memory=None, is_conversational=False, langsmith_api_key=None, **kwargs):
@@ -43,8 +46,9 @@ class AgentWrapper(LLM):
         super().__init__(**kwargs)
 
         self.name = name
+        self.in_memory = []
         self.agent = self._wrap_agent(agent, langsmith_api_key)
-        self.memory = memory
+        self.memory = self._initialize_memory(memory)
         self.is_conversational = is_conversational
         self.logger = self._initialize_logger(name)
         self.langsmith_enabled = langsmith_api_key is not None and traceable is not None
@@ -53,6 +57,30 @@ class AgentWrapper(LLM):
         self.langsmith_tracer = None
         if self.langsmith_enabled:
             self.langsmith_tracer = LangSmithTracer(api_key=langsmith_api_key)
+
+    def _initialize_memory(self, memory: Optional[Any]) -> Optional[Any]:
+        """
+        Initialize or validate the memory configuration.
+
+        Parameters:
+        - memory: The provided memory instance.
+
+        Returns:
+        - A valid memory instance or None.
+        """
+        # Check if the agent already has memory
+        if hasattr(self.agent, "memory") and self.agent.memory is not None:
+            return self.agent.memory
+
+        # Use the provided memory if available
+        if memory:
+            if BaseMemory and isinstance(memory, BaseMemory):
+                return memory
+            else:
+                raise ValueError("Invalid memory instance provided. Ensure compatibility with LangChain memory classes.")
+
+        # Default to internal in-memory storage
+        return self.in_memory
 
     def _wrap_agent(self, agent: Any, langsmith_api_key: Optional[str]) -> Any:
         """
@@ -72,7 +100,7 @@ class AgentWrapper(LLM):
             elif traceable:
                 # General tracing for other callable agents
                 run_type = "chain" if hasattr(agent, "run") else "llm"
-                return traceable(run_type=run_type, name=self.name)(agent)
+                return traceable(run_type=run_type, name=self._get_module_path(agent))(agent)
         return agent
 
     @staticmethod
@@ -122,6 +150,24 @@ class AgentWrapper(LLM):
             logger.addHandler(handler)
             logger.setLevel(logging.INFO)
         return logger
+
+    def run(self, *args, **kwargs):
+        """
+        Override the `run` method to ensure LangSwarm features are applied.
+
+        Returns:
+        - The agent's response after applying LangSwarm features.
+        """
+        return self.chat(*args, **kwargs)
+
+    def invoke(self, *args, **kwargs):
+        """
+        Override the `invoke` method for LangChain agents.
+
+        Returns:
+        - The agent's response after invoking LangSwarm features.
+        """
+        return self.chat(*args, **kwargs)
 
     def chat(self, q=None, reset=False, erase_query=False, remove_linebreaks=False):
         """
