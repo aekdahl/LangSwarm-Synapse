@@ -1,3 +1,4 @@
+import logging
 from .swarm import Swarm
 
 class LLMAggregation(Swarm):
@@ -26,6 +27,16 @@ class LLMAggregation(Swarm):
         if not self.query:
             raise ValueError('Requires query to be set as a string at init.')
 
+        self.logger = logging.getLogger("LangSwarm.Aggregation")
+        if not self.logger.hasHandlers():
+            handler = logging.StreamHandler()
+            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+            handler.setFormatter(formatter)
+            self.logger.addHandler(handler)
+            self.logger.setLevel(logging.INFO)
+
+        self.logger.info("Aggregation logger initialized.")
+        
     def generate_paragraphs(self):
         """
         Generate response paragraphs for the given query from all LLM clients.
