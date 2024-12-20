@@ -1,0 +1,21 @@
+name: Download Repository Files
+
+on:
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Zip Repository Files
+      run: zip -r repo-files.zip .
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: repository-files
+        path: repo-files.zip
