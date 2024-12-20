@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 from decimal import Decimal
 from sentence_transformers import SentenceTransformer, util
@@ -6,7 +7,7 @@ from transformers import pipeline
 class Swarm:
     """
     ToDo: Clean up the verbose outputs (prints)
-
+    ToDo: Log instead of print? Or both?
 
     A multi-agent system for output validation and consensus using semantic similarity,
     paraphrase detection, and cosine similarity.
@@ -53,7 +54,8 @@ class Swarm:
         requirements=None,
         paraphrase_threshold=0.8,
         model='all-MiniLM-L6-v2',
-        instructions='You are a helpful assistant.'
+        instructions='You are a helpful assistant.',
+        logger=None
     ):
         self.llms = llms or []
         self.query = query
@@ -82,6 +84,19 @@ class Swarm:
 
         if self.verbose and not self.clients:
             print("\nBots:", self.bots)
+
+        if logger:
+            self.logger = logger
+        else:
+            self.logger = logging.getLogger("LangSwarm.Core")
+            if not self.logger.hasHandlers():
+                handler = logging.StreamHandler()
+                formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+                handler.setFormatter(formatter)
+                self.logger.addHandler(handler)
+                self.logger.setLevel(logging.INFO)
+    
+            self.logger.info("Core logger initialized.")
 
     def check_initialization(self):
         """
