@@ -1,4 +1,3 @@
-import logging
 from .swarm import Swarm
 
 class LLMVoting(Swarm):
@@ -26,16 +25,6 @@ class LLMVoting(Swarm):
             raise ValueError('Requires clients to be set as a list of LLMs at init.')
         if not self.query:
             raise ValueError('Requires query to be set as a string at init.')
-        
-        self.logger = logging.getLogger("LangSwarm.Voting")
-        if not self.logger.hasHandlers():
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-            handler.setFormatter(formatter)
-            self.logger.addHandler(handler)
-            self.logger.setLevel(logging.INFO)
-
-        self.logger.info("Voting logger initialized.")
 
     def generate_paragraphs(self):
         """
