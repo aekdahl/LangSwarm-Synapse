@@ -45,6 +45,9 @@ class AgentWrapper(LLM, BaseWrapper, LoggingMixin, MemoryMixin):
             elif callable(self.agent):
                 context = " ".join([message["content"] for message in self.in_memory]) if self.is_conversational else q
                 response = self.agent(context)
+            elif isinstance(self.agent, GPTSimpleVectorIndex):
+                # LlamaIndex agents
+                response = self.agent.query(q).response
             else:
                 raise ValueError(f"Unsupported agent type: {type(self.agent)}")
 
