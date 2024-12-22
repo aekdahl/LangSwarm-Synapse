@@ -42,11 +42,11 @@ class AgentWrapper(LLM, BaseWrapper, LoggingMixin, MemoryMixin):
             # Handle different agent types
             if hasattr(self.agent, "run"):
                 # LangChain agents
-                context = " ".join([message["content"] for message in self.in_memory])
-                response = self.agent.query(context if self.memory else q).response
+                response = self.agent.run(q)
             elif _is_llamaindex_agent(self.agent):
                 # LlamaIndex agents
-                response = self.agent.query(q).response
+                context = " ".join([message["content"] for message in self.in_memory])
+                response = self.agent.query(context if self.memory else q).response
             elif callable(self.agent):
                 # Hugging Face agents
                 context = " ".join([message["content"] for message in self.in_memory]) if self.is_conversational else q
