@@ -41,13 +41,16 @@ class AgentWrapper(LLM, BaseWrapper, LoggingMixin, MemoryMixin):
         try:
             # Handle different agent types
             if hasattr(self.agent, "run"):
-                response = self.agent.run(q)
-            elif callable(self.agent):
-                context = " ".join([message["content"] for message in self.in_memory]) if self.is_conversational else q
-                response = self.agent(context)
-            elif isinstance(self.agent, GPTSimpleVectorIndex):
+                # LangChain agents
+                context = " ".join([message["content"] for message in self.in_memory])
+                response = self.agent.query(context if self.memory else q).response
+            elif _is_llamaindex_agent(self.agent):
                 # LlamaIndex agents
                 response = self.agent.query(q).response
+            elif callable(self.agent):
+                # Hugging Face agents
+                context = " ".join([message["content"] for message in self.in_memory]) if self.is_conversational else q
+                response = self.agent(context)
             else:
                 raise ValueError(f"Unsupported agent type: {type(self.agent)}")
 
