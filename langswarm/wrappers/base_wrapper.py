@@ -35,6 +35,33 @@ class BaseWrapper:
             return GPTSimpleVectorIndex(doc_objects)
         return agent
 
+    @staticmethod
+    def _get_module_path(module_class: Any) -> str:
+        """
+        Returns the full module path of a given class or callable.
+        :param module_class: The class or callable to get the module path for.
+        :type module_class: Any
+        :return: The module path
+        :rtype: str
+        """
+        return (
+            getattr(module_class, "__module__", "")
+            + "."
+            + getattr(module_class, "__name__", "")
+        ).strip(".")
+        
+    @staticmethod
+    def _is_openai_llm(agent: Any) -> bool:
+        """
+        Determine if the agent is an OpenAI LLM.
+        Parameters:
+        - agent: The agent to check.
+        Returns:
+        - bool: True if the agent is an OpenAI LLM, False otherwise.
+        """
+        return hasattr(agent, "model") and "openai" in str(type(agent)).lower()
+
+    @staticmethod
     def _is_llamaindex_agent(agent):
         """
         Determine if the given agent is a LlamaIndex agent.
