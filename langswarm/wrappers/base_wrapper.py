@@ -35,6 +35,21 @@ class BaseWrapper:
             return GPTSimpleVectorIndex(doc_objects)
         return agent
 
+    def _is_llamaindex_agent(agent):
+        """
+        Determine if the given agent is a LlamaIndex agent.
+    
+        Parameters:
+        - agent: The agent to check.
+    
+        Returns:
+        - bool: True if the agent is a LlamaIndex agent, False otherwise.
+        """
+        module_name = getattr(agent.__class__, "__module__", "")
+        if "llama_index" in module_name:
+            return True
+        return callable(getattr(agent, "query", None))
+
     def _validate_agent(self):
         if not callable(self.agent) and not hasattr(self.agent, "run"):
             raise ValueError(f"Unsupported agent type: {type(self.agent)}")
