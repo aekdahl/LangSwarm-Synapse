@@ -1,5 +1,4 @@
 import re
-import logging
 
 from ..bot import LLM
 from .swarm import Swarm
@@ -44,16 +43,6 @@ class LLMRouting:
         self.query = query
         self.remove_chat = remove_chat
         self.verbose = verbose
-        
-        self.logger = logging.getLogger("LangSwarm.Routing")
-        if not self.logger.hasHandlers():
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-            handler.setFormatter(formatter)
-            self.logger.addHandler(handler)
-            self.logger.setLevel(logging.INFO)
-
-        self.logger.info("Routing logger initialized.")
 
     def call(self, _bot, _query):
         """

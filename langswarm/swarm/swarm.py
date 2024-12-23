@@ -1,4 +1,3 @@
-import logging
 import numpy as np
 from decimal import Decimal
 from sentence_transformers import SentenceTransformer, util
@@ -54,8 +53,7 @@ class Swarm:
         requirements=None,
         paraphrase_threshold=0.8,
         model='all-MiniLM-L6-v2',
-        instructions='You are a helpful assistant.',
-        logger=None
+        instructions='You are a helpful assistant.'
     ):
         self.llms = llms or []
         self.query = query
@@ -84,19 +82,6 @@ class Swarm:
 
         if self.verbose and not self.clients:
             print("\nBots:", self.bots)
-
-        if logger:
-            self.logger = logger
-        else:
-            self.logger = logging.getLogger("LangSwarm.Core")
-            if not self.logger.hasHandlers():
-                handler = logging.StreamHandler()
-                formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-                handler.setFormatter(formatter)
-                self.logger.addHandler(handler)
-                self.logger.setLevel(logging.INFO)
-    
-            self.logger.info("Core logger initialized.")
 
     def check_initialization(self):
         """
