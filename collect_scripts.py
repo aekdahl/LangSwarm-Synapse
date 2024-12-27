@@ -2,7 +2,7 @@ import os
 
 # Function to write all files into a single output file
 def collect_scripts(start_folder="START_FOLDER", output_file="collected_scripts.txt"):
-    start_path = os.path.join(os.getcwd(), start_folder)
+    start_path = os.path.join(os.getenv("GITHUB_WORKSPACE", os.getcwd()), start_folder)
     if not os.path.exists(start_path):
         print(f"Error: The folder '{start_folder}' does not exist.")
         return
