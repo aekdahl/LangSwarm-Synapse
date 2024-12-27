@@ -1,3 +1,5 @@
+from langswarm.registry.agent_registry import AgentRegistry
+
 class BaseWrapper:
     """
     Base class for wrapping agents, providing initialization and validation.
