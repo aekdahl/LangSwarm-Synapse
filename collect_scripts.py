@@ -1,5 +1,7 @@
 import os
 
+# SET START FOLDER AT THE END OF THE SCRIPT
+
 # Function to write all files into a single output file
 def collect_scripts(start_folder="START_FOLDER", output_file="collected_scripts.txt"):
     start_path = os.path.join(os.getenv("GITHUB_WORKSPACE", os.getcwd()), start_folder)
