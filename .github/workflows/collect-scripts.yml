@@ -20,9 +20,9 @@ jobs:
           python-version: "3.8"
 
       # Step 3: Install dependencies (if needed)
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt || true
+      #- name: Install dependencies
+      #  run: |
+      #    pip install -r requirements.txt || true
 
       # Step 4: Run the Python script
       - name: Run collect_scripts.py
