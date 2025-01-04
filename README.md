@@ -21,9 +21,42 @@ pip install langswarm-synapse
 Here’s how you can use LangSwarm-Synapse to enable consensus among agents:
 
 ```python
+from langswarm.core.factory.agents import AgentFactory
 from langswarm.synapse.interface import Templates
 
-agents = [agent1, agent2, agent3]  # List of initialized LLM agents
+# Set environment variables
+os.environ['OPENAI_API_KEY'] = 'your-openai-api-key'
+
+# Create a LangChain agent
+agent1 = AgentFactory.create(name="agent1", agent_type="langchain-openai",model="gpt-4")
+
+# Create a OpenAI agent
+agent2 = AgentFactory.create(name="agent2", agent_type="openai",model="gpt-4")
+
+agents = [agent1, agent2]  # List of initialized LLM agents
+query = "What are the benefits of renewable energy?"
+
+# Use the consensus workflow
+result = Templates.consensus(agents, query)
+print(result)
+```
+
+### Bring your own agents
+
+Here’s how you can use LangSwarm-Synapse to enable consensus among your own agents:
+
+```python
+from langswarm.core.wrappers.generic import AgentWrapper
+from langswarm.synapse.interface import Templates
+
+# Set environment variables
+os.environ['OPENAI_API_KEY'] = 'your-openai-api-key'
+
+# Wrap your LangChain agents using LangSwarm's AgentWrapper
+agent1 = AgentWrapper(name="langchain_agent", agent=llm_chain)
+agent2 = AgentWrapper(name="langchain_agent2", agent=llm_chain2)
+
+agents = [agent1, agent2]  # List of initialized LLM agents
 query = "What are the benefits of renewable energy?"
 
 # Use the consensus workflow
