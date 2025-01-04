@@ -5,5 +5,5 @@ langchain==0.2.17
 tiktoken==0.7.0
 llama-index==0.11.23
 pyyaml==6.0.2
-sentence-transformers==0.0.1
-transformers==0.0.1
+sentence-transformers==3.2.1
+transformers==4.46.3
