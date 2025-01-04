@@ -212,17 +212,43 @@ class Swarm:
 
     def dynamic_threshold(self, global_average_similarity, threshold, adjustment_factor=0.8):
         """
-        Adjust the threshold dynamically based on global similarity.
-
-        Args:
-            global_average_similarity (float): Average similarity score.
-            threshold (float): Initial threshold.
-            adjustment_factor (float): Factor for adjusting the threshold.
-
+        Adjust the threshold dynamically based on the global similarity.
+    
+        Parameters:
+        - global_average_similarity (float): Average similarity score (0.0 to 1.0).
+        - threshold (float): Initial threshold value (0.0 to 1.0).
+        - adjustment_factor (float): Factor for adjusting the threshold.
+    
         Returns:
-            float: Adjusted threshold.
+        - float: Adjusted threshold value, clamped between 0.0 and 1.0.
+    
+        Raises:
+        - ValueError: If input values are out of expected ranges.
         """
-        return threshold - (adjustment_factor * (threshold - global_average_similarity))
+        # Input validation
+        if not (0.0 <= global_average_similarity <= 1.0):
+            raise ValueError("global_average_similarity must be between 0.0 and 1.0")
+        if not (0.0 <= threshold <= 1.0):
+            raise ValueError("threshold must be between 0.0 and 1.0")
+        if not (0.0 <= adjustment_factor <= 1.0):
+            raise ValueError("adjustment_factor must be between 0.0 and 1.0")
+    
+        # Calculate adjusted threshold
+        adjusted_threshold = threshold - (adjustment_factor * (threshold - global_average_similarity))
+    
+        # Clamp the result between 0.0 and 1.0
+        adjusted_threshold = max(0.0, min(1.0, adjusted_threshold))
+    
+        # Log for debugging
+        if self.verbose:
+            print(f"Dynamic Threshold Adjustment:")
+            print(f"  Original Threshold: {threshold}")
+            print(f"  Global Avg Similarity: {global_average_similarity}")
+            print(f"  Adjustment Factor: {adjustment_factor}")
+            print(f"  Adjusted Threshold: {adjusted_threshold}")
+    
+        return adjusted_threshold
+
 
     def classify_requirements(self, requirements):
         """
