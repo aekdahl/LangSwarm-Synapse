@@ -61,6 +61,23 @@ result = Templates.consensus(agents, query)
 print(result)
 ```
 
+### Use the AgentRegistry
+
+Here’s how you can use the agent registry to select agents to use:
+
+```python
+from langswarm.core.registry.agents import AgentRegistry
+from langswarm.synapse.interface import Templates
+
+# Pick the agents you need from the LangSwarm's AgentRegistry
+agents = AgentRegistry.get_agents_by_names(["agent1", "agent3", "agent2"])
+query = "What are the benefits of renewable energy?"
+
+# Use the consensus workflow
+result = Templates.consensus(agents, query)
+print(result)
+```
+
 ## Workflows
 
 ### 1. Consensus
