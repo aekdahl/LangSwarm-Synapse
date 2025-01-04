@@ -105,8 +105,6 @@ result = Templates.consensus(agents, query)
 print(result)
 ```
 
----
-
 ### 2. **Voting**
 **Purpose**: To enable collaborative decision-making by allowing agents to vote on their preferred response.
 
@@ -130,7 +128,6 @@ result, group_size, responses = Templates.voting(agents, query)
 print(f"Result: {result}, Group Size: {group_size}")
 ```
 
----
 
 ### 3. **Branching**
 **Purpose**: To explore diverse perspectives by generating multiple responses from agents without attempting to unify them.
@@ -153,8 +150,6 @@ responses = Templates.branching(agents, query)
 print(f"Responses: {responses}")
 ```
 
----
-
 ### 4. **Aggregation**
 **Purpose**: To merge and unify responses from multiple agents into a single coherent output.
 
@@ -176,8 +171,6 @@ query = "Summarize the current advancements in AI."
 aggregated_result = Templates.aggregation(agents, query)
 print(f"Aggregated Result: {aggregated_result}")
 ```
-
----
 
 ### 5. **Routing**
 **Purpose**: To dynamically assign tasks to the most appropriate workflows or agents based on predefined logic.
@@ -204,14 +197,98 @@ result = routing_tool.run()
 print(f"Routed Result: {result}")
 ```
 
----
-
 ### Why Use LangSwarm-Synapse Workflows?
 
 1. **Flexibility**: Choose workflows based on the specific needs of your application.
 2. **Scalability**: Handle multiple agents and complex queries efficiently.
 3. **Customizability**: Fine-tune thresholds, routing logic, and aggregation methods.
 4. **Collaboration**: Combine the strengths of multiple agents to achieve better results.
+
+## Tools and Chains: Extending LangChain with LangSwarm Workflows
+
+LangSwarm-Synapse introduces **tools** and **chains** that seamlessly integrate into LangChain workflows. By subclassing LangChain’s core abstractions, these components enable advanced multi-agent workflows like consensus-building, voting, and aggregation within native LangChain pipelines.
+
+### Tools: Modular Workflow Components for LangChain
+
+LangSwarm tools provide single-purpose functionality, such as consensus-building, that can be integrated into LangChain workflows as part of a broader pipeline.
+
+#### Example: Using a Tool in a LangChain Workflow
+
+```python
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
+from synapse.tools.consensus_tool import LangSwarmConsensusTool
+
+# Step 1: Create a LangChain LLMChain to preprocess the query
+prompt = PromptTemplate(
+    input_variables=["topic"],
+    template="What are the main benefits of {topic}?",
+)
+llm_chain = LLMChain(prompt=prompt, llm=llm)
+
+# Step 2: Initialize the LangSwarm consensus tool
+agents = [agent1, agent2, agent3]
+consensus_tool = LangSwarmConsensusTool(agents=agents)
+
+# Step 3: Run the pipeline
+query = "renewable energy"
+preprocessed_query = llm_chain.run(topic=query)  # Generates a refined query
+result = consensus_tool.run(preprocessed_query)  # Agents generate responses and agree on a consensus
+
+print(result)  # Unified response from agents
+```
+
+**Explanation of `.run`:**
+- **LLMChain**: Generates a refined query using the input topic and a prompt.
+- **Consensus Tool**: Processes the refined query:
+  - Each agent generates a response.
+  - Responses are grouped into clusters based on similarity.
+  - The best response is selected as the consensus result.
+
+### Chains: Predefined Pipelines for LangChain
+
+LangSwarm chains combine multiple steps, such as querying agents and consolidating their outputs, into reusable LangChain pipelines.
+
+#### Example: Using a Chain in a LangChain Workflow
+
+```python
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain, SimpleSequentialChain
+from synapse.chains.consensus_chain import ConsensusChain
+
+# Step 1: Create a LangChain LLMChain for query preparation
+prompt = PromptTemplate(
+    input_variables=["topic"],
+    template="Explain the key advantages of {topic}.",
+)
+llm_chain = LLMChain(prompt=prompt, llm=llm)
+
+# Step 2: Initialize the LangSwarm consensus chain
+agents = [agent1, agent2, agent3]
+consensus_chain = ConsensusChain(agents=agents)
+
+# Step 3: Combine them into a SequentialChain
+pipeline = SimpleSequentialChain(chains=[llm_chain, consensus_chain])
+
+# Step 4: Run the pipeline
+query = "solar energy"
+result = pipeline.run({"topic": query})
+
+print(result["consensus_result"])  # Outputs the unified response
+```
+
+**Explanation of `.run`:**
+- **LLMChain**: Generates a query based on the input topic using a prompt.
+- **Consensus Chain**: Processes the query:
+  - Agents generate responses independently.
+  - Responses are grouped into clusters by similarity.
+  - A unified result is derived from the best cluster.
+
+### Key Benefits of Tools and Chains
+
+1. **Seamless Integration**: Tools and chains subclass LangChain’s abstractions, fitting naturally into pipelines.
+2. **Modularity**: Use tools and chains as standalone components or combine them into complex workflows.
+3. **Multi-Agent Collaboration**: Enable advanced workflows like consensus-building, voting, and aggregation with minimal effort.
 
 ## Development
 
@@ -240,7 +317,3 @@ We welcome contributions! Please fork the repository, make your changes, and ope
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-Happy coding with LangSwarm-Synapse!
