@@ -80,20 +80,138 @@ print(result)
 
 ## Workflows
 
-### 1. Consensus
-Enable agreement among agents using shared similarity measures and thresholds.
+LangSwarm-Synapse provides powerful workflows for multi-agent systems, enabling agents to collaborate and make decisions efficiently. Below are the details of each workflow and the methodology used:
 
-### 2. Voting
-Aggregate responses and determine consensus through voting-based decision-making.
+### 1. **Consensus**
+**Purpose**: To reach agreement among multiple agents on a given query by identifying a response that represents the most common or best-aligned viewpoint.
 
-### 3. Branching
-Generate diverse outputs from multiple agents to explore varied perspectives.
+**How it Works**:
+1. Each agent generates a response to the query independently.
+2. Responses are encoded into embeddings using a language model (e.g., SentenceTransformer).
+3. The similarity between all responses is calculated using cosine similarity.
+4. Responses are grouped into clusters of similar responses (paraphrase groups) based on a similarity threshold.
+5. The cluster with the highest similarity score is selected as the consensus group.
+6. Within the consensus group, the response most similar to all others (highest average similarity) is chosen as the final consensus.
 
-### 4. Aggregation
-Merge responses into a single, deduplicated, and unified result.
+**Example**:
+```python
+from synapse.interface.templates import Templates
 
-### 5. Routing
-Dynamically assign tasks to workflows or agents based on predefined logic.
+agents = [agent1, agent2, agent3]  # List of initialized LLM agents
+query = "What are the benefits of renewable energy?"
+
+# Use the consensus workflow
+result = Templates.consensus(agents, query)
+print(result)
+```
+
+---
+
+### 2. **Voting**
+**Purpose**: To enable collaborative decision-making by allowing agents to vote on their preferred response.
+
+**How it Works**:
+1. Agents generate responses to the query.
+2. Each response is treated as a "vote."
+3. The votes are tallied, and the response with the most votes is selected as the outcome.
+4. Additional metadata, such as the total number of votes and group size, is returned.
+
+**Use Case**: Ideal for scenarios where explicit preferences or majority opinion is required.
+
+**Example**:
+```python
+from synapse.interface.templates import Templates
+
+agents = [agent1, agent2, agent3]
+query = "What is the most important principle of democracy?"
+
+# Use the voting workflow
+result, group_size, responses = Templates.voting(agents, query)
+print(f"Result: {result}, Group Size: {group_size}")
+```
+
+---
+
+### 3. **Branching**
+**Purpose**: To explore diverse perspectives by generating multiple responses from agents without attempting to unify them.
+
+**How it Works**:
+1. Each agent independently generates a response to the query.
+2. All responses are returned as a list, allowing users to examine varied viewpoints or solutions.
+
+**Use Case**: Best for brainstorming, creative writing, or scenarios requiring diversity in responses.
+
+**Example**:
+```python
+from synapse.interface.templates import Templates
+
+agents = [agent1, agent2, agent3]
+query = "Suggest some innovative ideas for renewable energy."
+
+# Use the branching workflow
+responses = Templates.branching(agents, query)
+print(f"Responses: {responses}")
+```
+
+---
+
+### 4. **Aggregation**
+**Purpose**: To merge and unify responses from multiple agents into a single coherent output.
+
+**How it Works**:
+1. Each agent generates a response to the query.
+2. The responses are aggregated into a single output by deduplicating and consolidating overlapping ideas.
+3. A helper bot (if configured) can assist in combining the responses meaningfully.
+
+**Use Case**: Useful for creating summaries, extracting common themes, or consolidating information.
+
+**Example**:
+```python
+from synapse.interface.templates import Templates
+
+agents = [agent1, agent2, agent3]
+query = "Summarize the current advancements in AI."
+
+# Use the aggregation workflow
+aggregated_result = Templates.aggregation(agents, query)
+print(f"Aggregated Result: {aggregated_result}")
+```
+
+---
+
+### 5. **Routing**
+**Purpose**: To dynamically assign tasks to the most appropriate workflows or agents based on predefined logic.
+
+**How it Works**:
+1. A routing strategy is defined (e.g., consensus, branching, prompt reformulation).
+2. The input query is analyzed, and the appropriate workflow or agent is selected dynamically.
+3. The task is executed based on the selected strategy.
+
+**Use Case**: Ideal for complex tasks where different parts of a query require different workflows or specialized agents.
+
+**Example**:
+```python
+from synapse.tools.routing_tool import LangSwarmRoutingTool
+
+agents = {"bot1": agent1, "bot2": agent2}
+main_bot = agent1  # Define the main bot for routing decisions
+query = "Explain the differences between AI and ML."
+route = 2  # Use the consensus route
+
+# Use the routing workflow
+routing_tool = LangSwarmRoutingTool(route=route, bots=agents, main_bot=main_bot, query=query)
+result = routing_tool.run()
+print(f"Routed Result: {result}")
+```
+
+---
+
+### Why Use LangSwarm-Synapse Workflows?
+
+1. **Flexibility**: Choose workflows based on the specific needs of your application.
+2. **Scalability**: Handle multiple agents and complex queries efficiently.
+3. **Customizability**: Fine-tune thresholds, routing logic, and aggregation methods.
+4. **Collaboration**: Combine the strengths of multiple agents to achieve better results.
 
 ## Development
 
