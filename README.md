@@ -49,9 +49,6 @@ Here’s how you can use LangSwarm-Synapse to enable consensus among your own ag
 from langswarm.core.wrappers.generic import AgentWrapper
 from langswarm.synapse.interface import Templates
 
-# Set environment variables
-os.environ['OPENAI_API_KEY'] = 'your-openai-api-key'
-
 # Wrap your LangChain agents using LangSwarm's AgentWrapper
 agent1 = AgentWrapper(name="langchain_agent", agent=llm_chain)
 agent2 = AgentWrapper(name="langchain_agent2", agent=llm_chain2)
