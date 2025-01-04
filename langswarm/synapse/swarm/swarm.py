@@ -290,54 +290,67 @@ class Swarm:
     def get_consensus(self, paraphrase_groups, compliant_paragraphs, compliant_embeddings):
         """
         Determine the paragraph that is most similar to all other compliant paragraphs.
-
+    
         This method calculates the consensus paragraph from paraphrase groups based on average cosine similarity. 
         If there are only two paraphrase groups, binary consensus is assumed, and the largest group is selected.
-
+    
         Parameters:
         - paraphrase_groups (list of lists): Groups of paragraphs identified as paraphrases of each other.
         - compliant_paragraphs (list): List of all compliant paragraphs.
         - compliant_embeddings (list): Embeddings of the compliant paragraphs.
-
+    
         Returns:
         - best_paragraph (str): The paragraph with the highest consensus.
         - highest_similarity (float): The similarity score of the selected paragraph.
         - group_size_of_best (int): The size of the paraphrase group containing the selected paragraph.
         """
-        best_paragraph = None  # Holds the paragraph with the highest consensus.
-        highest_similarity = -1  # Tracks the highest average similarity score.
-        group_size_of_best = 0  # Size of the group containing the best paragraph.
-
-        # Step 1: Handle special case where there are exactly two paraphrase groups.
-        if len(paraphrase_groups) == 2:
-            # Assume binary consensus and retain only the larger group.
-            paraphrase_groups = [max(paraphrase_groups, key=len)]
-
-        # Step 2: Iterate over each paraphrase group to calculate average similarity.
-        for group in paraphrase_groups:
-            if len(group) > 1:
-                # Encode all paragraphs in the group into embeddings.
-                paragraph_embeddings = self.model.encode(group)
-
-                # Compute the average cosine similarity for each paragraph within the group.
-                avg_similarities = [
-                    util.cos_sim(paragraph_embeddings[i], paragraph_embeddings).mean().item()
-                    for i in range(len(group))
-                ]
-
-                # Find the paragraph with the highest average similarity within the group.
-                best_index = avg_similarities.index(max(avg_similarities))
-                if avg_similarities[best_index] > highest_similarity:
-                    best_paragraph = group[best_index]
-                    highest_similarity = avg_similarities[best_index]
-                    group_size_of_best = len(group)
-            else:
-                # Handle single-paragraph groups (no paraphrases in this group).
-                if highest_similarity == -1:  # Select the first single paragraph if no best found yet.
-                    best_paragraph = group[0]
-                    group_size_of_best = len(group)
-
+    
+        # Initialize variables to track the best consensus
+        best_paragraph = None
+        highest_similarity = -1
+        group_size_of_best = 0
+    
+        try:
+            # Step 1: Handle special case where there are exactly two paraphrase groups
+            if len(paraphrase_groups) == 2:
+                # Assume binary consensus and retain only the larger group
+                paraphrase_groups = [max(paraphrase_groups, key=len)]
+    
+            # Step 2: Iterate over each paraphrase group to calculate average similarity
+            for group in paraphrase_groups:
+                if len(group) > 1:  # Only consider groups with more than one paragraph
+                    # Encode all paragraphs in the group into embeddings
+                    paragraph_embeddings = self.model.encode(group)
+    
+                    # Compute the average cosine similarity for each paragraph within the group
+                    avg_similarities = [
+                        util.cos_sim(paragraph_embeddings[i], paragraph_embeddings).mean().item()
+                        for i in range(len(group))
+                    ]
+    
+                    # Find the paragraph with the highest average similarity within the group
+                    best_index = avg_similarities.index(max(avg_similarities))
+                    if avg_similarities[best_index] > highest_similarity:
+                        best_paragraph = group[best_index]
+                        highest_similarity = avg_similarities[best_index]
+                        group_size_of_best = len(group)
+                else:
+                    # Handle single-paragraph groups (no paraphrases in this group)
+                    if highest_similarity == -1:  # Select the first single paragraph if no best found yet
+                        best_paragraph = group[0]
+                        group_size_of_best = len(group)
+    
+        except Exception as e:
+            # Log the error for debugging purposes
+            if self.verbose:
+                print(f"Error during get_consensus: {e}")
+            # Fallback in case of an error
+            best_paragraph = "No consensus could be determined."
+            highest_similarity = 0
+            group_size_of_best = 0
+    
         return best_paragraph, highest_similarity, group_size_of_best
+
 
 
     def run(self):
