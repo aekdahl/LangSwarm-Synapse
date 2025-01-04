@@ -1,24 +1,39 @@
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, find_namespace_packages
 
+# Read dependencies from requirements.txt
+with open("requirements.txt", "r") as f:
+    requirements = f.read().splitlines()
+    
 setup(
-    name="langswarm",
-    version="0.1.0",
-    description="Multi-agent orchestration for LLMs with LangChain, Hugging Face, and more.",
-    author="Your Name",
-    author_email="your.email@example.com",
-    packages=find_packages(where="langswarm"),
-    package_dir={"": "langswarm"},
-    install_requires=[
-        "langchain",
-        "langchain_google_genai",
-        "transformers",
-        "sentence-transformers",
-        # Add any other dependencies here
-    ],
-    python_requires=">=3.8",
+    name="langswarm-synapse",
+    version="0.0.1",
+    description="A core framework for multi-agent LLM ecosystems",
+    long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
+    url="https://github.com/aekdahl/langswarm-synapse",
+    author="Alexander Ekdahl",
+    author_email="alexander.ekdahl@gmail.com",
+    license="MIT",
     classifiers=[
-        "Programming Language :: Python :: 3.8",
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
+    packages=find_namespace_packages(include=["langswarm.*"]),
+    python_requires=">=3.8",
+    install_requires=requirements,
+    extras_require={
+        "dev": ["pytest", "black", "flake8"],
+    },
+    include_package_data=True,
+    entry_points={
+        "console_scripts": [
+            # If your package includes CLI tools, specify them here.
+            # e.g., "langswarm=core.cli:main",
+        ],
+    },
 )
