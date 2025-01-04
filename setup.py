@@ -7,7 +7,7 @@ with open("requirements.txt", "r") as f:
 setup(
     name="langswarm-synapse",
     version="0.0.1",
-    description="A framework for multi-agent LLM ecosystems",
+    description="A framework for multi-agent LLM ecosystems, enabling workflows such as consensus-building, voting, branching, and aggregation to enhance AI collaboration and decision-making.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/aekdahl/langswarm-synapse",
