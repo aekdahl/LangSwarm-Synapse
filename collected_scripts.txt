@@ -1,0 +1,2153 @@
+# Total Document Length: 62930 characters
+
+
+--------------------------------------------------------------------------------
+File: collect_scripts.py
+--------------------------------------------------------------------------------
+
+import os
+
+# Function to write all files into a single output file
+def collect_scripts(start_folder="START_FOLDER", output_file="collected_scripts.txt", include_root_files=False):
+    # Determine the repository root and the start path
+    repo_root = os.getenv("GITHUB_WORKSPACE", os.getcwd())
+    start_path = os.path.join(repo_root, start_folder)
+
+    if not os.path.exists(start_path):
+        print(f"Error: The folder '{start_folder}' does not exist.")
+        return
+
+    total_length = 0  # Variable to track the total length of the document
+
+    with open(output_file, "w", encoding="utf-8") as outfile:
+        # Include files from the root folder of the repository if the flag is set
+        if include_root_files:
+            for file in os.listdir(repo_root):
+                file_path = os.path.join(repo_root, file)
+                if os.path.isfile(file_path) and not file.startswith("."):  # Exclude hidden files
+                    try:
+                        # Write the relative file name and path as a header
+                        relative_path = os.path.relpath(file_path, repo_root)
+                        outfile.write(f"\n{'-'*80}\n")
+                        outfile.write(f"File: {relative_path}\n")
+                        outfile.write(f"{'-'*80}\n\n")
+
+                        # Read the file content and write it
+                        with open(file_path, "r", encoding="utf-8") as infile:
+                            content = infile.read()
+                            total_length += len(content)
+                            outfile.write(content)
+                            outfile.write("\n\n")
+                    except Exception as e:
+                        # Log files that couldn't be read
+                        error_message = f"[ERROR READING FILE: {file} - {e}]\n\n"
+                        total_length += len(error_message)
+                        outfile.write(error_message)
+
+        # Walk through the specified folder and its subfolders
+        for root, _, files in os.walk(start_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                relative_path = os.path.relpath(file_path, start_path)
+
+                try:
+                    # Write the relative file name and path as a header
+                    outfile.write(f"\n{'-'*80}\n")
+                    outfile.write(f"File: {relative_path}\n")
+                    outfile.write(f"{'-'*80}\n\n")
+
+                    # Read the file content and write it
+                    with open(file_path, "r", encoding="utf-8") as infile:
+                        content = infile.read()
+                        total_length += len(content)
+                        outfile.write(content)
+                        outfile.write("\n\n")
+                except Exception as e:
+                    # Log files that couldn't be read
+                    error_message = f"[ERROR READING FILE: {relative_path} - {e}]\n\n"
+                    total_length += len(error_message)
+                    outfile.write(error_message)
+
+    # Prepend the total document length to the file
+    prepend_length_comment(output_file, total_length)
+
+
+def prepend_length_comment(output_file, total_length):
+    """
+    Prepend a comment with the total document length to the output file.
+    """
+    with open(output_file, "r+", encoding="utf-8") as f:
+        content = f.read()
+        f.seek(0, 0)  # Move to the start of the file
+        f.write(f"# Total Document Length: {total_length} characters\n\n")
+        f.write(content)
+
+
+if __name__ == "__main__":
+    output_filename = "collected_scripts.txt"
+    start_folder = "langswarm"  # Specify the start folder (e.g., "/" for the root of the repository)
+    include_root = True  # Set this flag to True to include files in the repository root folder
+    print(f"Collecting scripts from '{start_folder}' into {output_filename}...")
+    collect_scripts(start_folder=start_folder, output_file=output_filename, include_root_files=include_root)
+    print(f"All scripts have been collected into {output_filename}.")
+
+
+
+--------------------------------------------------------------------------------
+File: README.md
+--------------------------------------------------------------------------------
+
+
+
+
+
+--------------------------------------------------------------------------------
+File: collected_scripts.txt
+--------------------------------------------------------------------------------
+
+
+
+
+--------------------------------------------------------------------------------
+File: setup.cfg
+--------------------------------------------------------------------------------
+
+[metadata]
+description-file = README.md
+
+[options]
+packages = find:
+python_requires = >=3.8
+
+[options.extras_require]
+dev =
+    pytest
+    black
+    flake8
+
+
+
+--------------------------------------------------------------------------------
+File: pyproject.toml
+--------------------------------------------------------------------------------
+
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+
+--------------------------------------------------------------------------------
+File: MANIFEST.in
+--------------------------------------------------------------------------------
+
+include README.md
+include LICENSE
+include requirements.txt
+recursive-include core *
+recursive-exclude __pycache__ *
+recursive-exclude *.pyc
+
+
+
+--------------------------------------------------------------------------------
+File: LICENSE
+--------------------------------------------------------------------------------
+
+MIT License
+
+Copyright (c) 2025 Alexander Ekdahl
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software...
+
+
+
+--------------------------------------------------------------------------------
+File: setup.py
+--------------------------------------------------------------------------------
+
+from setuptools import setup, find_packages, find_namespace_packages
+
+# Read dependencies from requirements.txt
+with open("requirements.txt", "r") as f:
+    requirements = f.read().splitlines()
+    
+setup(
+    name="langswarm-synapse",
+    version="0.0.1",
+    description="A framework for multi-agent LLM ecosystems",
+    long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
+    url="https://github.com/aekdahl/langswarm-synapse",
+    author="Alexander Ekdahl",
+    author_email="alexander.ekdahl@gmail.com",
+    license="MIT",
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+    ],
+    packages=find_namespace_packages(include=["langswarm.*"]),
+    python_requires=">=3.8",
+    install_requires=requirements,
+    extras_require={
+        "dev": ["pytest", "black", "flake8"],
+    },
+    include_package_data=True,
+    entry_points={
+        "console_scripts": [
+            # If your package includes CLI tools, specify them here.
+            # e.g., "langswarm=core.cli:main",
+        ],
+    },
+)
+
+
+
+--------------------------------------------------------------------------------
+File: requirements.txt
+--------------------------------------------------------------------------------
+
+# Supported versions of Python: 3.10, 3.11, 3.8, 3.9
+# Automatically updated by dependency_update_test.py
+
+langchain==0.2.17
+tiktoken==0.7.0
+llama-index==0.11.23
+pyyaml==6.0.2
+
+
+
+--------------------------------------------------------------------------------
+File: dependency_update_test.py
+--------------------------------------------------------------------------------
+
+import subprocess
+import requests
+import sys
+from packaging.version import Version
+
+
+def fetch_versions(package_name):
+    """
+    Fetch all available versions of a package from PyPI.
+    """
+    url = f"https://pypi.org/pypi/{package_name}/json"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        all_versions = list(response.json()["releases"].keys())
+        # Sort versions using `packaging.version.Version`
+        all_versions.sort(key=Version)
+        return all_versions
+    except requests.RequestException as e:
+        print(f"Error fetching versions for {package_name}: {e}")
+        return []
+
+
+def test_dependency_version(package, version):
+    """
+    Test if a specific version of a package can be installed.
+    """
+    try:
+        print(f"Testing {package}=={version}...")
+        subprocess.run(
+            [sys.executable, "-m", "pip", "install", f"{package}=={version}"],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        print(f"{package}=={version} installed successfully!")
+        return True
+    except subprocess.CalledProcessError:
+        print(f"{package}=={version} failed.")
+        return False
+
+
+def find_oldest_compatible_version(package, versions):
+    """
+    Find the oldest compatible version of a package by testing all versions.
+    """
+    compatible_version = None
+    for version in reversed(versions):  # Test oldest versions first
+        if test_dependency_version(package, version):
+            compatible_version = version
+            break
+    return compatible_version
+
+
+def get_supported_python_versions():
+    """
+    Extract the list of supported Python versions from the requirements.txt file.
+    """
+    supported_versions = []
+    try:
+        with open("requirements.txt", "r") as f:
+            for line in f:
+                if line.startswith("# Supported versions of Python:"):
+                    supported_versions = line.strip().split(":")[1].strip().split(", ")
+                    break
+    except FileNotFoundError:
+        pass
+    return supported_versions
+
+
+def update_requirements_with_python_versions(dependency_versions, python_version, success):
+    """
+    Update the requirements.txt file with the latest compatible versions
+    and maintain only supported Python versions.
+    """
+    # Get existing supported versions
+    supported_versions = set(get_supported_python_versions())
+
+    if success:
+        supported_versions.add(python_version)  # Add the Python version if it succeeded
+    else:
+        supported_versions.discard(python_version)  # Remove the version if it failed
+
+    # Sort for consistency
+    supported_versions = sorted(supported_versions)
+
+    with open("requirements.txt", "w") as f:
+        # Add the comment about supported Python versions
+        f.write(f"# Supported versions of Python: {', '.join(supported_versions)}\n")
+        f.write("# Automatically updated by dependency_update_test.py\n\n")
+
+        # Write the compatible dependency versions
+        for package, compatible_version in dependency_versions.items():
+            f.write(f"{package}=={compatible_version}\n")
+    print("requirements.txt updated successfully with Python version support comment.")
+
+
+def main(python_version):
+    # Read dependencies from requirements.txt
+    try:
+        with open("requirements.txt", "r") as f:
+            dependencies = [line.strip().split("==")[0] for line in f if "==" in line]
+    except FileNotFoundError:
+        print("requirements.txt not found.")
+        sys.exit(1)
+
+    latest_versions = {}
+    success = True  # Track whether all tests passed
+    for package in dependencies:
+        print(f"\nFetching versions for {package}...")
+        versions = fetch_versions(package)
+        if not versions:
+            print(f"No versions found for {package}. Skipping...")
+            continue
+
+        print(f"Available versions for {package}: {versions}")
+        compatible_version = find_oldest_compatible_version(package, versions)
+        if compatible_version:
+            print(f"Oldest compatible version for {package}: {compatible_version}")
+            latest_versions[package] = compatible_version
+        else:
+            print(f"No compatible version found for {package} on Python {python_version}.")
+            success = False
+            break  # Exit the loop and mark the test as failed
+
+    # Update requirements.txt with compatible versions and supported Python versions
+    update_requirements_with_python_versions(latest_versions, python_version, success)
+
+    if not success:
+        sys.exit(1)  # Exit with failure if any dependency test failed
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python dependency_update_test.py <python_version>")
+        sys.exit(1)
+    main(sys.argv[1])
+
+
+
+--------------------------------------------------------------------------------
+File: __init__.py
+--------------------------------------------------------------------------------
+
+
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/__init__.py
+--------------------------------------------------------------------------------
+
+
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/logger/__init__.py
+--------------------------------------------------------------------------------
+
+
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/logger/logger.py
+--------------------------------------------------------------------------------
+
+try:
+    from langsmith import LangSmith
+except ImportError:
+    LangSmith = None  # Fallback if LangSmith is not installed
+
+
+class LangSwarmLogger:
+    """
+    A logger for LangSwarm workflows. If LangSmith is installed, it logs interactions
+    to LangSmith. If not, it performs no logging (no-op).
+    """
+
+    def __init__(self, api_key=None):
+        if LangSmith:
+            self.smith = LangSmith(api_key=api_key)
+        else:
+            self.smith = None
+
+    def log_interaction(self, swarm_name, input_data, output_data, metadata=None):
+        """
+        Logs an interaction if LangSmith is available. Otherwise, it does nothing.
+
+        Parameters:
+        - swarm_name (str): The name of the swarm workflow (e.g., "LLMConsensus").
+        - input_data (dict): The input data for the workflow.
+        - output_data (dict): The output data from the workflow.
+        - metadata (dict, optional): Additional metadata for the interaction.
+        """
+        if self.smith:
+            self.smith.log_chain_interaction(
+                chain_name=swarm_name,
+                input_data=input_data,
+                output_data=output_data,
+                metadata=metadata or {}
+            )
+        else:
+            # No-op if LangSmith is not installed
+            pass
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/interface/__init__.py
+--------------------------------------------------------------------------------
+
+
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/interface/templates.py
+--------------------------------------------------------------------------------
+
+from .langswarm import LangSwarm
+
+class Templates:
+    """
+    Predefined templates for common LangSwarm workflows.
+    """
+
+    @staticmethod
+    def consensus(agents, query):
+        """
+        Predefined template for consensus workflow.
+
+        Parameters:
+        - agents (list): List of agents.
+        - query (str): Query string.
+
+        Returns:
+        - str: Consensus result.
+        """
+        pipeline = LangSwarm.create(workflow="consensus", agents=agents)
+        return pipeline.run(query)
+
+    @staticmethod
+    def voting(agents, query):
+        """
+        Predefined template for voting workflow.
+
+        Parameters:
+        - agents (list): List of agents.
+        - query (str): Query string.
+
+        Returns:
+        - tuple: Voting result, group size, and responses.
+        """
+        pipeline = LangSwarm.create(workflow="voting", agents=agents)
+        return pipeline.run(query)
+
+    @staticmethod
+    def branching(agents, query):
+        """
+        Predefined template for branching workflow.
+
+        Parameters:
+        - agents (list): List of agents.
+        - query (str): Query string.
+
+        Returns:
+        - list: List of responses from the agents.
+        """
+        pipeline = LangSwarm.create(workflow="branching", agents=agents)
+        return pipeline.run(query)
+
+    @staticmethod
+    def aggregation(agents, query):
+        """
+        Predefined template for aggregation workflow.
+
+        Parameters:
+        - agents (list): List of agents.
+        - query (str): Query string.
+
+        Returns:
+        - str: Aggregated result.
+        """
+        pipeline = LangSwarm.create(workflow="aggregation", agents=agents)
+        return pipeline.run(query)
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/interface/langswarm.py
+--------------------------------------------------------------------------------
+
+class LangSwarm:
+    """
+    LangSwarm High-Level API for initializing and configuring workflows.
+
+    This class provides a unified interface for creating pipelines using LangSwarm modules.
+    """
+
+    @staticmethod
+    def create(workflow, agents, **kwargs):
+        """
+        Create a LangSwarm pipeline based on the specified workflow.
+
+        Parameters:
+        - workflow (str): The type of workflow (e.g., 'consensus', 'voting', 'branching', 'aggregation').
+        - agents (list): List of agents to be used in the workflow.
+        - kwargs: Additional parameters for specific workflows.
+
+        Returns:
+        - object: Initialized pipeline or tool based on the selected workflow.
+        """
+        if workflow == "consensus":
+            from langswarm.swarm.consensus import LangSwarmConsensusTool
+            return LangSwarmConsensusTool(agents=agents, **kwargs)
+
+        elif workflow == "voting":
+            from langswarm.swarm.voting import LangSwarmVotingTool
+            return LangSwarmVotingTool(agents=agents, **kwargs)
+
+        elif workflow == "branching":
+            from langswarm.swarm.branching import LangSwarmBranchingTool
+            return LangSwarmBranchingTool(agents=agents, **kwargs)
+
+        elif workflow == "aggregation":
+            from langswarm.swarm.aggregation import LangSwarmAggregationTool
+            return LangSwarmAggregationTool(agents=agents, **kwargs)
+
+        else:
+            raise ValueError(f"Unsupported workflow type: {workflow}")
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/tools/aggregation_tool.py
+--------------------------------------------------------------------------------
+
+"""
+LangSwarmAggregationTool: A LangChain-compatible tool that uses the LLMAggregation
+class to merge and aggregate responses from multiple LLM agents.
+
+Purpose:
+- Integrates LLMAggregation into LangChain workflows as a reusable tool.
+- Enables aggregation of diverse responses into a unified output.
+"""
+
+from langchain.tools import Tool
+from langswarm.swarm.aggregation import LLMAggregation
+
+class LangSwarmAggregationTool(Tool):
+    def __init__(self, agents, **kwargs):
+        """
+        Initializes the LangSwarmAggregationTool.
+
+        Parameters:
+        - agents (list): List of agents to use in the aggregation process.
+        - kwargs: Additional parameters for the LLMAggregation class.
+        """
+        self.aggregation = LLMAggregation(clients=agents, **kwargs)
+        super().__init__(
+            name="LangSwarm Aggregation",
+            func=self.run,
+            description="A tool to merge and aggregate responses from multiple agents."
+        )
+
+    def run(self, query, hb):
+        """
+        Executes the aggregation workflow with the given query.
+
+        Parameters:
+        - query (str): The query to process.
+        - hb: Additional aggregation handler, if required.
+
+        Returns:
+        - str: The aggregated result.
+        """
+        self.aggregation.query = query
+        return self.aggregation.run(hb)
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/tools/__init__.py
+--------------------------------------------------------------------------------
+
+
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/tools/consensus_tool.py
+--------------------------------------------------------------------------------
+
+"""
+LangSwarmConsensusTool: A LangChain-compatible tool that uses the LLMConsensus
+class to achieve consensus among multiple LLM agents for a given query.
+
+Purpose:
+- Integrates LLMConsensus into LangChain workflows as a reusable tool.
+- Allows developers to use consensus-building as a modular step in pipelines.
+"""
+
+from langchain.tools import Tool
+from langswarm.swarm.consensus import LLMConsensus
+
+class LangSwarmConsensusTool(Tool):
+    def __init__(self, agents, **kwargs):
+        """
+        Initializes the LangSwarmConsensusTool.
+
+        Parameters:
+        - agents (list): List of agents to use in the consensus process.
+        - kwargs: Additional parameters for the LLMConsensus class.
+        """
+        self.consensus = LLMConsensus(clients=agents, **kwargs)
+        super().__init__(
+            name="LangSwarm Consensus",
+            func=self.run,
+            description="A tool to reach consensus among multiple agents for a given query."
+        )
+
+    def run(self, query):
+        """
+        Executes the consensus workflow with the given query.
+
+        Parameters:
+        - query (str): The query to process.
+
+        Returns:
+        - str: The consensus result.
+        """
+        self.consensus.query = query
+        return self.consensus.run()
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/tools/routing_tool.py
+--------------------------------------------------------------------------------
+
+"""
+LangSwarmRoutingTool: A LangChain-compatible tool that uses the LLMRouting
+class to dynamically route tasks to the appropriate agents or workflows.
+
+Purpose:
+- Integrates LLMRouting into LangChain workflows as a dynamic routing tool.
+- Allows tasks to be routed based on predefined logic.
+"""
+
+from langchain.tools import Tool
+from langswarm.swarm.routing import LLMRouting
+
+class LangSwarmRoutingTool(Tool):
+    def __init__(self, route, bots, main_bot, **kwargs):
+        """
+        Initializes the LangSwarmRoutingTool.
+
+        Parameters:
+        - route (int): The routing logic to apply.
+        - bots (dict): Dictionary of bots to route tasks.
+        - main_bot: The primary bot for routing decisions.
+        - kwargs: Additional parameters for the LLMRouting class.
+        """
+        self.routing = LLMRouting(route=route, bots=bots, main_bot=main_bot, **kwargs)
+        super().__init__(
+            name="LangSwarm Routing",
+            func=self.run,
+            description="A tool to dynamically route tasks to the appropriate agents."
+        )
+
+    def run(self, query):
+        """
+        Executes the routing workflow with the given query.
+
+        Parameters:
+        - query (str): The query to process.
+
+        Returns:
+        - str: The result from the routed agent.
+        """
+        self.routing.query = query
+        return self.routing.run()
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/tools/voting_tool.py
+--------------------------------------------------------------------------------
+
+"""
+LangSwarmVotingTool: A LangChain-compatible tool that uses the LLMVoting
+class to enable voting-based decision-making among multiple agents.
+
+Purpose:
+- Integrates LLMVoting into LangChain workflows as a voting tool.
+- Facilitates collaborative decision-making by tallying agent responses.
+"""
+
+from langchain.tools import Tool
+from langswarm.swarm.voting import LLMVoting
+
+class LangSwarmVotingTool(Tool):
+    def __init__(self, agents, **kwargs):
+        """
+        Initializes the LangSwarmVotingTool.
+
+        Parameters:
+        - agents (list): List of agents to use in the voting process.
+        - kwargs: Additional parameters for the LLMVoting class.
+        """
+        self.voting = LLMVoting(clients=agents, **kwargs)
+        super().__init__(
+            name="LangSwarm Voting",
+            func=self.run,
+            description="A tool to enable voting-based decision-making among agents."
+        )
+
+    def run(self, query):
+        """
+        Executes the voting workflow with the given query.
+
+        Parameters:
+        - query (str): The query to process.
+
+        Returns:
+        - tuple: The consensus result, group size, and list of responses.
+        """
+        self.voting.query = query
+        return self.voting.run()
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/tools/branching_tool.py
+--------------------------------------------------------------------------------
+
+"""
+LangSwarmBranchingTool: A LangChain-compatible tool that uses the LLMBranching
+class to generate multiple responses from a set of LLM agents for a given query.
+
+Purpose:
+- Integrates LLMBranching into LangChain workflows as a modular tool.
+- Enables generation of diverse outputs from multiple agents.
+"""
+
+from langchain.tools import Tool
+from langswarm.swarm.branching import LLMBranching
+
+class LangSwarmBranchingTool(Tool):
+    def __init__(self, agents, **kwargs):
+        """
+        Initializes the LangSwarmBranchingTool.
+
+        Parameters:
+        - agents (list): List of agents to use in the branching process.
+        - kwargs: Additional parameters for the LLMBranching class.
+        """
+        self.branching = LLMBranching(clients=agents, **kwargs)
+        super().__init__(
+            name="LangSwarm Branching",
+            func=self.run,
+            description="A tool to generate multiple responses from a set of agents."
+        )
+
+    def run(self, query):
+        """
+        Executes the branching workflow with the given query.
+
+        Parameters:
+        - query (str): The query to process.
+
+        Returns:
+        - list: A list of responses from the agents.
+        """
+        self.branching.query = query
+        return self.branching.run()
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/chains/aggregation_chain.py
+--------------------------------------------------------------------------------
+
+"""
+AggregationChain: A LangChain-compatible chain that uses the LLMAggregation
+class to merge and aggregate responses from multiple LLM agents.
+
+Purpose:
+- Provides a reusable chain for aggregation workflows within LangChain.
+- Enables chaining aggregation with other tools or agents in pipelines.
+"""
+
+from langchain.chains.base import Chain
+from langswarm.swarm.aggregation import LLMAggregation
+
+class AggregationChain(Chain):
+    def __init__(self, agents, **kwargs):
+        """
+        Initializes the AggregationChain.
+
+        Parameters:
+        - agents (list): List of agents to use in the aggregation process.
+        - kwargs: Additional parameters for the LLMAggregation class.
+        """
+        self.aggregation = LLMAggregation(clients=agents, **kwargs)
+
+    @property
+    def input_keys(self):
+        """Define input keys for the chain."""
+        return ["query", "hb"]
+
+    @property
+    def output_keys(self):
+        """Define output keys for the chain."""
+        return ["aggregated_result"]
+
+    def _call(self, inputs):
+        """
+        Processes the input query and returns the aggregated result.
+
+        Parameters:
+        - inputs (dict): Dictionary containing the query and handler.
+
+        Returns:
+        - dict: Dictionary containing the aggregated result.
+        """
+        query = inputs["query"]
+        hb = inputs["hb"]
+        self.aggregation.query = query
+        result = self.aggregation.run(hb)
+        return {"aggregated_result": result}
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/chains/branching_chain.py
+--------------------------------------------------------------------------------
+
+"""
+BranchingChain: A LangChain-compatible chain that uses the LLMBranching
+class to generate multiple responses from a set of LLM agents for a given query.
+
+Purpose:
+- Provides a reusable chain for branching workflows within LangChain.
+- Enables chaining branching with other tools or agents in pipelines.
+"""
+
+from langchain.chains.base import Chain
+from langswarm.swarm.branching import LLMBranching
+
+class BranchingChain(Chain):
+    def __init__(self, agents, **kwargs):
+        """
+        Initializes the BranchingChain.
+
+        Parameters:
+        - agents (list): List of agents to use in the branching process.
+        - kwargs: Additional parameters for the LLMBranching class.
+        """
+        self.branching = LLMBranching(clients=agents, **kwargs)
+
+    @property
+    def input_keys(self):
+        """Define input keys for the chain."""
+        return ["query"]
+
+    @property
+    def output_keys(self):
+        """Define output keys for the chain."""
+        return ["responses"]
+
+    def _call(self, inputs):
+        """
+        Processes the input query and returns a list of responses.
+
+        Parameters:
+        - inputs (dict): Dictionary containing the query.
+
+        Returns:
+        - dict: Dictionary containing the list of responses.
+        """
+        query = inputs["query"]
+        self.branching.query = query
+        responses = self.branching.run()
+        return {"responses": responses}
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/chains/voting_chain.py
+--------------------------------------------------------------------------------
+
+"""
+VotingChain: A LangChain-compatible chain that uses the LLMVoting
+class to enable voting-based decision-making among multiple agents.
+
+Purpose:
+- Provides a reusable chain for voting workflows within LangChain.
+- Enables chaining voting with other tools or agents in pipelines.
+"""
+
+from langchain.chains.base import Chain
+from langswarm.swarm.voting import LLMVoting
+
+class VotingChain(Chain):
+    def __init__(self, agents, **kwargs):
+        """
+        Initializes the VotingChain.
+
+        Parameters:
+        - agents (list): List of agents to use in the voting process.
+        - kwargs: Additional parameters for the LLMVoting class.
+        """
+        self.voting = LLMVoting(clients=agents, **kwargs)
+
+    @property
+    def input_keys(self):
+        """Define input keys for the chain."""
+        return ["query"]
+
+    @property
+    def output_keys(self):
+        """Define output keys for the chain."""
+        return ["voting_result", "group_size", "responses"]
+
+    def _call(self, inputs):
+        """
+        Processes the input query and returns the voting result.
+
+        Parameters:
+        - inputs (dict): Dictionary containing the query.
+
+        Returns:
+        - dict: Dictionary containing the voting result, group size, and responses.
+        """
+        query = inputs["query"]
+        result, group_size, responses = self.voting.run()
+        return {
+            "voting_result": result,
+            "group_size": group_size,
+            "responses": responses,
+        }
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/chains/consensus_chain.py
+--------------------------------------------------------------------------------
+
+"""
+ConsensusChain: A LangChain-compatible chain that leverages the LLMConsensus
+class to achieve consensus among multiple LLM agents for a given query.
+
+Purpose:
+- Provides a reusable chain for consensus-building within LangChain workflows.
+- Enables chaining consensus with other LangChain tools or agents.
+"""
+
+from langchain.chains.base import Chain
+from langswarm.swarm.consensus import LLMConsensus
+
+class ConsensusChain(Chain):
+    def __init__(self, agents, **kwargs):
+        """
+        Initializes the ConsensusChain.
+
+        Parameters:
+        - agents (list): List of agents to use in the consensus process.
+        - kwargs: Additional parameters for the LLMConsensus class.
+        """
+        self.consensus = LLMConsensus(clients=agents, **kwargs)
+
+    @property
+    def input_keys(self):
+        """Define input keys for the chain."""
+        return ["query"]
+
+    @property
+    def output_keys(self):
+        """Define output keys for the chain."""
+        return ["consensus_result"]
+
+    def _call(self, inputs):
+        """
+        Processes the input query and returns the consensus result.
+
+        Parameters:
+        - inputs (dict): Dictionary containing the query.
+
+        Returns:
+        - dict: Dictionary containing the consensus result.
+        """
+        query = inputs["query"]
+        self.consensus.query = query
+        result = self.consensus.run()
+        return {"consensus_result": result}
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/chains/__init__.py
+--------------------------------------------------------------------------------
+
+
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/chains/routing_chain.py
+--------------------------------------------------------------------------------
+
+"""
+RoutingChain: A LangChain-compatible chain that uses the LLMRouting
+class to dynamically route tasks to the appropriate agents or workflows.
+
+Purpose:
+- Provides a reusable chain for dynamic routing within LangChain.
+- Enables chaining routing with other tools or agents in pipelines.
+"""
+
+from langchain.chains.base import Chain
+from langswarm.swarm.routing import LLMRouting
+
+class RoutingChain(Chain):
+    def __init__(self, route, bots, main_bot, **kwargs):
+        """
+        Initializes the RoutingChain.
+
+        Parameters:
+        - route (int): The routing logic to apply.
+        - bots (dict): Dictionary of bots to route tasks.
+        - main_bot: The primary bot for routing decisions.
+        - kwargs: Additional parameters for the LLMRouting class.
+        """
+        self.routing = LLMRouting(route=route, bots=bots, main_bot=main_bot, **kwargs)
+
+    @property
+    def input_keys(self):
+        """Define input keys for the chain."""
+        return ["query"]
+
+    @property
+    def output_keys(self):
+        """Define output keys for the chain."""
+        return ["routed_result"]
+
+    def _call(self, inputs):
+        """
+        Processes the input query and returns the routed result.
+
+        Parameters:
+        - inputs (dict): Dictionary containing the query.
+
+        Returns:
+        - dict: Dictionary containing the routed result.
+        """
+        query = inputs["query"]
+        self.routing.query = query
+        result = self.routing.run()
+        return {"routed_result": result}
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/swarm/voting.py
+--------------------------------------------------------------------------------
+
+from .swarm import Swarm
+
+class LLMVoting(Swarm):
+    """
+    A subclass of Swarm that facilitates voting-based consensus among multiple LLMs.
+
+    This class requires:
+    - A list of initialized LLM clients (`clients`) provided during instantiation.
+    - A non-empty query string (`query`) for generating responses.
+
+    Attributes:
+        clients (list): List of LLM instances for voting workflows.
+        query (str): Query string to guide LLM responses.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize LLMVoting with required attributes and validate inputs.
+
+        Raises:
+            ValueError: If `clients` is not set or `query` is empty.
+        """
+        super().__init__(*args, **kwargs)
+        if len(self.clients) < 1:
+            raise ValueError('Requires clients to be set as a list of LLMs at init.')
+        if not self.query:
+            raise ValueError('Requires query to be set as a string at init.')
+
+    def generate_paragraphs(self):
+        """
+        Generate response paragraphs for the given query from all LLM clients.
+
+        Returns:
+            int: Number of clients that generated paragraphs.
+        """
+        for client in self.clients:
+            self._create_paragraphs(client, erase_query=True)
+        return len(self.clients)
+
+    def instantiate(self):
+        """
+        Validate initialization and generate paragraphs.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        if self.check_initialization():
+            if self.verbose:
+                print("\nInitialization successful.")
+
+            created_clients = self.generate_paragraphs()
+
+            if self.verbose:
+                print("\nClients created:", created_clients)
+
+            return True
+
+        return False
+
+    def create_embeddings(self, paragraphs):
+        """
+        Generate embeddings for the given paragraphs.
+
+        Args:
+            paragraphs (list): List of response paragraphs.
+
+        Returns:
+            tuple: Original paragraphs and their embeddings.
+        """
+        paragraph_embeddings = self.model.encode(paragraphs)
+        return paragraphs, paragraph_embeddings
+
+    def run(self):
+        """
+        Execute the voting workflow among LLM clients.
+
+        Returns:
+            tuple: Consensus paragraph, size of the consensus group, and all generated paragraphs.
+        """
+        consensus_paragraph = 'No consensus found.'
+
+        if self.instantiate():
+            if self.verbose:
+                print("Class Instantiated.")
+
+            # Calculate global average similarity among responses
+            global_average_similarity = self.calculate_global_similarity(self.paragraphs, self.paragraphs)
+
+            if self.verbose:
+                print("Global Average Similarity:", global_average_similarity)
+
+            # Dynamically adjust thresholds
+            dynamic_threshold = self.dynamic_threshold(global_average_similarity, self.threshold, adjustment_factor=0.8)
+            dynamic_paraphrase_threshold = self.dynamic_threshold(global_average_similarity, self.paraphrase_threshold, adjustment_factor=0.8)
+
+            if self.verbose:
+                print("Dynamic Threshold:", dynamic_threshold)
+                print("Dynamic Paraphrase Threshold:", dynamic_paraphrase_threshold)
+
+            # Generate embeddings for paragraphs
+            paragraphs, paragraph_embeddings = self.create_embeddings(self.paragraphs)
+
+            if self.verbose:
+                print("Created embeddings.")
+
+            # Detect paraphrase groups based on similarity
+            paraphrase_groups = self.detect_paraphrases(paragraphs, paragraph_embeddings, dynamic_paraphrase_threshold)
+
+            # Determine consensus from paraphrase groups
+            consensus_paragraph, highest_similarity, group_size_of_best = self.get_consensus(
+                paraphrase_groups, paragraphs, paragraph_embeddings
+            )
+
+            if self.verbose:
+                print("\nHighest Similarity:", highest_similarity)
+                print("\nConsensus Paragraph:", consensus_paragraph)
+                print("\nConsensus Group Size:", group_size_of_best)
+
+        return consensus_paragraph, group_size_of_best, self.paragraphs
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/swarm/branching.py
+--------------------------------------------------------------------------------
+
+from .swarm import Swarm
+
+class LLMBranching(Swarm):
+    """
+    A subclass of Swarm that enables branching workflows for multiple LLMs.
+
+    This class requires:
+    - A list of initialized LLM clients (`clients`) provided during instantiation.
+    - A non-empty query string (`query`) for generating responses.
+
+    Attributes:
+        clients (list): List of LLM instances for branching workflows.
+        query (str): Query string to guide LLM responses.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize LLMBranching with required attributes and validate inputs.
+
+        Raises:
+            ValueError: If `clients` is not set or `query` is empty.
+        """
+        super().__init__(*args, **kwargs)
+        if len(self.clients) < 1:
+            raise ValueError('Requires clients to be set as a list of LLMs at init.')
+        if not self.query:
+            raise ValueError('Requires query to be set as a string at init.')
+
+    def generate_paragraphs(self):
+        """
+        Generate response paragraphs for the given query from all LLM clients.
+
+        Returns:
+            int: Number of clients that generated paragraphs.
+        """
+        for client in self.clients:
+            self._create_paragraphs(client, erase_query=True)
+        return len(self.clients)
+
+    def instantiate(self):
+        """
+        Validate initialization and generate paragraphs.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        if self.check_initialization():
+            if self.verbose:
+                print("\nInitialization successful.")
+
+            created_clients = self.generate_paragraphs()
+
+            if self.verbose:
+                print("\nClients created:", created_clients)
+
+            return True
+
+        return False
+
+    def run(self):
+        """
+        Execute the branching workflow among LLM clients.
+
+        Returns:
+            list: List of paragraphs generated by LLM clients.
+        """
+        if self.instantiate():
+            if self.verbose:
+                print("Class Instantiated.")
+
+        return self.paragraphs
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/swarm/aggregation.py
+--------------------------------------------------------------------------------
+
+from .swarm import Swarm
+
+class LLMAggregation(Swarm):
+    """
+    A subclass of Swarm that focuses on aggregating outputs from multiple LLMs.
+
+    This class requires:
+    - A list of initialized LLM clients (`clients`) provided during instantiation.
+    - A non-empty query string (`query`) for generating responses.
+
+    Attributes:
+        clients (list): List of LLM instances for aggregation.
+        query (str): Query string to guide LLM responses.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize LLMAggregation with required attributes and validate inputs.
+
+        Raises:
+            ValueError: If `clients` is not set or `query` is empty.
+        """
+        super().__init__(*args, **kwargs)
+        if len(self.clients) < 1:
+            raise ValueError('Requires clients to be set as a list of LLMs at init.')
+        if not self.query:
+            raise ValueError('Requires query to be set as a string at init.')
+        
+    def generate_paragraphs(self):
+        """
+        Generate response paragraphs for the given query from all LLM clients.
+
+        Returns:
+            int: Number of clients that generated paragraphs.
+        """
+        for client in self.clients:
+            self._create_paragraphs(client, erase_query=True)
+        return len(self.clients)
+
+    def instantiate(self):
+        """
+        Validate initialization and generate paragraphs.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        if self.check_initialization():
+            if self.verbose:
+                print("\nInitialization successful.")
+
+            created_clients = self.generate_paragraphs()
+
+            if self.verbose:
+                print("\nClients created:", created_clients)
+
+            return True
+
+        return False
+
+    def aggregate_list(self, paragraphs, hb):
+        """
+        Merge and aggregate data into a deduplicated list.
+
+        Args:
+            paragraphs (list): List of paragraphs generated by LLM clients.
+            hb: Helper bot instance for performing the aggregation task.
+
+        Returns:
+            str: Aggregated list as a single string.
+        """
+        query = f"""
+        Merge and aggregate the data into a list.
+
+        Data:
+        ---
+        {paragraphs}
+        ---
+        """
+        return hb.aggregator_bot.chat(q=query, reset=True, erase_query=True)
+
+    def run(self, hb):
+        """
+        Execute the aggregation workflow among LLM clients.
+
+        Args:
+            hb: Helper bot instance for performing the aggregation task.
+
+        Returns:
+            str: The aggregated paragraph or a message indicating failure.
+        """
+        aggregated_paragraph = 'No aggregation done.'
+
+        if self.instantiate():
+            if self.verbose:
+                print("Class Instantiated.")
+
+            # Aggregate the list of generated paragraphs
+            aggregated_paragraph = self.aggregate_list(self.paragraphs, hb)
+
+            if self.verbose:
+                print("Aggregated list:", aggregated_paragraph)
+
+        return aggregated_paragraph
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/swarm/__init__.py
+--------------------------------------------------------------------------------
+
+
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/swarm/consensus.py
+--------------------------------------------------------------------------------
+
+from .swarm import Swarm
+
+class LLMConsensus(Swarm):
+    """
+    A subclass of Swarm that facilitates consensus generation among multiple LLMs.
+
+    This class requires:
+    - A list of initialized LLM clients (`clients`) provided during instantiation.
+    - A non-empty query string (`query`) for generating responses.
+
+    Attributes:
+        clients (list): List of LLM instances for consensus generation.
+        query (str): Query string to guide LLM responses.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize LLMConsensus with required attributes and validate inputs.
+
+        Raises:
+            ValueError: If `clients` is not set or `query` is empty.
+        """
+        super().__init__(*args, **kwargs)
+        if len(self.clients) < 1:
+            raise ValueError('Requires clients to be set as a list of LLMs at init.')
+        if not self.query:
+            raise ValueError('Requires query to be set as a string at init.')
+
+    def generate_paragraphs(self):
+        """
+        Generate response paragraphs for the given query from all LLM clients.
+
+        Returns:
+            int: Number of clients that generated paragraphs.
+        """
+        for client in self.clients:
+            self._create_paragraphs(client, erase_query=True)
+        return len(self.clients)
+
+    def instantiate(self):
+        """
+        Validate initialization and generate paragraphs.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        if self.check_initialization():
+            if self.verbose:
+                print("\nInitialization successful.")
+
+            created_clients = self.generate_paragraphs()
+
+            if self.verbose:
+                print("\nClients created:", created_clients)
+
+            return True
+
+        return False
+
+    def create_embeddings(self, paragraphs):
+        """
+        Generate embeddings for the given paragraphs.
+
+        Args:
+            paragraphs (list): List of response paragraphs.
+
+        Returns:
+            tuple: Original paragraphs and their embeddings.
+        """
+        paragraph_embeddings = self.model.encode(paragraphs)
+        return paragraphs, paragraph_embeddings
+
+    def run(self):
+        """
+        Execute the consensus workflow among LLM clients.
+
+        Returns:
+            str: The consensus paragraph or a message indicating failure.
+        """
+        consensus_paragraph = 'No consensus found.'
+
+        if self.instantiate():
+            if self.verbose:
+                print("Class instantiated.")
+
+            # Calculate global average similarity among all responses
+            global_average_similarity = self.calculate_global_similarity(self.paragraphs, self.paragraphs)
+
+            if self.verbose:
+                print("Global Average Similarity:", global_average_similarity)
+
+            # Adjust similarity thresholds dynamically
+            dynamic_threshold = self.dynamic_threshold(global_average_similarity, self.threshold, adjustment_factor=0.8)
+
+            if self.verbose:
+                print("Dynamic Threshold:", dynamic_threshold)
+
+            dynamic_paraphrase_threshold = self.dynamic_threshold(global_average_similarity, self.paraphrase_threshold, adjustment_factor=0.8)
+
+            if self.verbose:
+                print("Dynamic Paraphrase Threshold:", dynamic_paraphrase_threshold)
+
+            # Generate embeddings for paragraphs
+            paragraphs, paragraph_embeddings = self.create_embeddings(self.paragraphs)
+
+            if self.verbose:
+                print("Created embeddings.")
+
+            # Detect paraphrase groups based on similarity
+            paraphrase_groups = self.detect_paraphrases(paragraphs, paragraph_embeddings, dynamic_paraphrase_threshold)
+
+            # Determine consensus from paraphrase groups
+            consensus_paragraph, highest_similarity, group_size_of_best = self.get_consensus(
+                paraphrase_groups, paragraphs, paragraph_embeddings
+            )
+
+            if self.verbose:
+                print("\nParagraphs:", self.paragraphs)
+                print("\nHighest Similarity:", highest_similarity)
+                print("\nConsensus Paragraph:", consensus_paragraph)
+                print("\nConsensus Group Size:", group_size_of_best)
+
+        return consensus_paragraph
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/swarm/swarm.py
+--------------------------------------------------------------------------------
+
+import numpy as np
+from decimal import Decimal
+from sentence_transformers import SentenceTransformer, util
+from transformers import pipeline
+
+class Swarm:
+    """
+    ToDo: Clean up the verbose outputs (prints)
+    ToDo: Log instead of print? Or both?
+
+    A multi-agent system for output validation and consensus using semantic similarity,
+    paraphrase detection, and cosine similarity.
+
+    This class implements the following:
+    - Byzantine Fault Tolerance (BFT)-like validation.
+    - Semantic matching to ensure compliance with predefined requirements.
+    - Paraphrase detection to identify and group semantically similar outputs.
+    - Consensus selection to determine the best output based on similarity.
+
+    Parameters:
+    - query (str): Input query for the agents.
+    - llms (list): List of LLM configurations (provider, model, and API key).
+    - clients (list): List of initialized clients.
+    - state (list): Initial state memory for agents.
+    - verbose (bool): Enable detailed logging.
+    - sensitivity (int): Sensitivity factor for determining the number of agents.
+    - minimum_bots (int): Minimum number of agents to instantiate.
+    - maximum_bots (int): Maximum number of agents to instantiate.
+    - confidence (float): Confidence level (0-1) for agent selection.
+    - threshold (float): Similarity threshold for validation.
+    - requirements (list): List of predefined requirements for output validation.
+    - paraphrase_threshold (float): Similarity threshold for paraphrase detection.
+    - model (str): Name of the SentenceTransformer model.
+    - instructions (str): Instructions for the agents.
+
+    Attributes:
+    - bots (int): Calculated number of agents based on sensitivity and confidence.
+    - paragraphs (list): Outputs generated by agents.
+    """
+
+    def __init__(
+        self,
+        query='',
+        llms=None,
+        clients=None,
+        state=None,
+        verbose=False,
+        sensitivity=1,
+        minimum_bots=1,
+        maximum_bots=100,
+        confidence=0.5,
+        threshold=0.75,
+        requirements=None,
+        paraphrase_threshold=0.8,
+        model='all-MiniLM-L6-v2',
+        instructions='You are a helpful assistant.'
+    ):
+        self.llms = llms or []
+        self.query = query
+        self.state = state
+        self.paragraphs = []
+        self.clients = clients or []
+        self.verbose = verbose
+        self.threshold = threshold
+        self.confidence = confidence
+        self.sensitivity = sensitivity
+        self.minimum_bots = minimum_bots
+        self.maximum_bots = maximum_bots
+        self.instructions = instructions
+        self.requirements = requirements or []
+        self.model = SentenceTransformer(model)
+        self.paraphrase_threshold = paraphrase_threshold
+        self.bots = int(
+            min(
+                self.maximum_bots,
+                max(
+                    self.minimum_bots,
+                    Decimal(str(self.confidence)).as_integer_ratio()[1] * self.sensitivity
+                )
+            )
+        )
+
+        if self.verbose and not self.clients:
+            print("\nBots:", self.bots)
+
+    def check_initialization(self):
+        """
+        Validate essential attributes before running the Swarm.
+
+        Returns:
+            bool: True if all necessary attributes are initialized.
+            
+        ToDo: Perform the checks.
+        """
+        #return all(
+        #    [
+        #        self.model,
+        #        self.requirements,
+        #        self.instructions,
+        #        self.threshold,
+        #        self.llms,
+        #        self.query,
+        #        isinstance(self.state, (list, type(None))),
+        #    ]
+        #)
+        return True
+
+    def _create_paragraphs(self, llm, erase_query=False):
+        """
+        Generate output paragraphs from an LLM client.
+
+        Args:
+            llm: Initialized LLM client.
+            erase_query (bool): Whether to remove the query from memory after execution.
+        """
+        if self.state is not None:
+            llm.set_memory(self.state)
+        self.paragraphs.append(llm.chat(q=self.query, erase_query=erase_query))
+
+    def _create_client(self, llm_config):
+        """
+        Initialize an LLM client and generate output.
+
+        Args:
+            llm_config (dict): Configuration for the LLM client.
+        """
+        if len(self.clients) >= self.bots:
+            return
+
+        _llm = LLM(
+            provider=llm_config['provider'],
+            model=llm_config['model'],
+            api_key=llm_config['key'],
+            system_prompt=f"""{self.instructions} {self.requirements}"""
+        )
+        self._create_paragraphs(_llm)
+
+        if self.verbose:
+            print("\nParagraph created.")
+
+        self.clients.append(_llm)
+
+        if self.verbose:
+            print("\nClient appended.")
+
+    def create_clients(self):
+        """
+        Create LLM clients and distribute tasks among them.
+
+        Returns:
+            int: Total number of clients created.
+        """
+        self.clients = []
+        counter = 0
+        nbr_of_llms = len(self.llms)
+
+        for _ in range(self.bots // nbr_of_llms):
+            [self._create_client(x) for x in self.llms]
+            counter += nbr_of_llms
+
+        for _ in range(self.bots % nbr_of_llms):
+            [self._create_client(x) for x in self.llms]
+            counter += 1
+
+            if len(self.clients) >= self.bots:
+                break
+
+        self.clients = self.clients[:self.bots]
+        return counter
+
+    def instantiate(self):
+        """
+        Ensure all prerequisites are met and initialize clients.
+
+        Returns:
+            bool: True if initialization is successful.
+        """
+        if self.check_initialization():
+            if self.verbose:
+                print("\nInitialization successful.")
+
+            created_clients = self.create_clients()
+
+            if self.verbose:
+                print("\nClients created:", created_clients)
+
+            return True
+
+        return False
+
+    def calculate_global_similarity(self, paragraphs, requirement_sentences):
+        """
+        Compute the global average similarity between outputs and requirements.
+
+        Args:
+            paragraphs (list): Generated outputs.
+            requirement_sentences (list): Requirement sentences.
+
+        Returns:
+            float: Global average similarity score.
+        """
+        requirement_embeddings = self.model.encode(requirement_sentences)
+        paragraph_embeddings = self.model.encode(paragraphs)
+
+        all_similarities = []
+
+        for paragraph_embedding in paragraph_embeddings:
+            similarities = util.cos_sim(paragraph_embedding, requirement_embeddings)
+            all_similarities.extend(similarities[0].tolist())
+
+        return np.mean(all_similarities)
+
+    def dynamic_threshold(self, global_average_similarity, threshold, adjustment_factor=0.8):
+        """
+        Adjust the threshold dynamically based on global similarity.
+
+        Args:
+            global_average_similarity (float): Average similarity score.
+            threshold (float): Initial threshold.
+            adjustment_factor (float): Factor for adjusting the threshold.
+
+        Returns:
+            float: Adjusted threshold.
+        """
+        return threshold - (adjustment_factor * (threshold - global_average_similarity))
+
+    def classify_requirements(self, requirements):
+        """
+        Classify requirements into positive and negative based on sentiment.
+
+        Args:
+            requirements (list): List of requirement sentences.
+
+        Returns:
+            tuple: Positive and negative requirements.
+        """
+        classifier = pipeline("text-classification", model="lxyuan/distilbert-base-multilingual-cased-sentiments-student")
+
+        positive_requirements = []
+        negative_requirements = []
+
+        for req in requirements:
+            if self.verbose:
+                print("\nClassify requirement:", req)
+
+            result = classifier(req)[0]
+
+            if self.verbose:
+                print("\nResult:", result)
+
+            label = result['label'].lower()
+
+            if label == 'positive':
+                positive_requirements.append(req)
+            else:
+                negative_requirements.append(req)
+
+        return positive_requirements, negative_requirements
+
+    def detect_paraphrases(self, compliant_paragraphs, compliant_embeddings, paraphrase_threshold):
+        """
+        Detect paraphrases among compliant paragraphs using cosine similarity.
+
+        Args:
+            compliant_paragraphs (list): Compliant paragraphs.
+            compliant_embeddings (list): Embeddings of compliant paragraphs.
+            paraphrase_threshold (float): Similarity threshold for paraphrases.
+
+        Returns:
+            list: Groups of paraphrases.
+        """
+        paraphrase_groups = []
+        used_paragraphs = set()
+
+        for i, paragraph_embedding in enumerate(compliant_embeddings):
+            if i not in used_paragraphs:
+                group = [compliant_paragraphs[i]]
+                used_paragraphs.add(i)
+
+                for j in range(i + 1, len(compliant_embeddings)):
+                    similarity = util.cos_sim(paragraph_embedding, compliant_embeddings[j])
+                    if similarity >= paraphrase_threshold:
+                        group.append(compliant_paragraphs[j])
+                        used_paragraphs.add(j)
+
+                paraphrase_groups.append(group)
+
+        return paraphrase_groups
+    
+    def get_consensus(self, paraphrase_groups, compliant_paragraphs, compliant_embeddings):
+        """
+        Determine the paragraph that is most similar to all other compliant paragraphs.
+
+        This method calculates the consensus paragraph from paraphrase groups based on average cosine similarity. 
+        If there are only two paraphrase groups, binary consensus is assumed, and the largest group is selected.
+
+        Parameters:
+        - paraphrase_groups (list of lists): Groups of paragraphs identified as paraphrases of each other.
+        - compliant_paragraphs (list): List of all compliant paragraphs.
+        - compliant_embeddings (list): Embeddings of the compliant paragraphs.
+
+        Returns:
+        - best_paragraph (str): The paragraph with the highest consensus.
+        - highest_similarity (float): The similarity score of the selected paragraph.
+        - group_size_of_best (int): The size of the paraphrase group containing the selected paragraph.
+        """
+        best_paragraph = None  # Holds the paragraph with the highest consensus.
+        highest_similarity = -1  # Tracks the highest average similarity score.
+        group_size_of_best = 0  # Size of the group containing the best paragraph.
+
+        # Step 1: Handle special case where there are exactly two paraphrase groups.
+        if len(paraphrase_groups) == 2:
+            # Assume binary consensus and retain only the larger group.
+            paraphrase_groups = [max(paraphrase_groups, key=len)]
+
+        # Step 2: Iterate over each paraphrase group to calculate average similarity.
+        for group in paraphrase_groups:
+            if len(group) > 1:
+                # Encode all paragraphs in the group into embeddings.
+                paragraph_embeddings = self.model.encode(group)
+
+                # Compute the average cosine similarity for each paragraph within the group.
+                avg_similarities = [
+                    util.cos_sim(paragraph_embeddings[i], paragraph_embeddings).mean().item()
+                    for i in range(len(group))
+                ]
+
+                # Find the paragraph with the highest average similarity within the group.
+                best_index = avg_similarities.index(max(avg_similarities))
+                if avg_similarities[best_index] > highest_similarity:
+                    best_paragraph = group[best_index]
+                    highest_similarity = avg_similarities[best_index]
+                    group_size_of_best = len(group)
+            else:
+                # Handle single-paragraph groups (no paraphrases in this group).
+                if highest_similarity == -1:  # Select the first single paragraph if no best found yet.
+                    best_paragraph = group[0]
+                    group_size_of_best = len(group)
+
+        return best_paragraph, highest_similarity, group_size_of_best
+
+
+    def run(self):
+        """
+        Execute the Swarm workflow and determine consensus output.
+
+        Returns:
+            str: Consensus paragraph.
+        """
+        consensus_paragraph = 'No consensus found.'
+
+        if self.instantiate():
+            if self.verbose:
+                print("Class instantiated.")
+
+            requirement_sentences = self.requirements
+
+            global_average_similarity = self.calculate_global_similarity(self.paragraphs, requirement_sentences)
+
+            if self.verbose:
+                print("Global Average Similarity:", global_average_similarity)
+
+            dynamic_threshold = self.dynamic_threshold(global_average_similarity, self.threshold)
+
+            if self.verbose:
+                print("Dynamic Threshold:", dynamic_threshold)
+
+            positive_requirements, negative_requirements = self.classify_requirements(requirement_sentences)
+
+            if self.verbose:
+                print("Positive Requirements:", positive_requirements)
+                print("Negative Requirements:", negative_requirements)
+
+            paraphrase_groups = self.detect_paraphrases(
+                self.paragraphs,
+                [self.model.encode(paragraph) for paragraph in self.paragraphs],
+                self.paraphrase_threshold
+            )
+
+            if self.verbose:
+                print("\nParaphrase Groups:", paraphrase_groups)
+
+            return consensus_paragraph
+
+        return consensus_paragraph
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/swarm/routing.py
+--------------------------------------------------------------------------------
+
+import re
+
+from ..bot import LLM
+from .swarm import Swarm
+from .branching import LLMBranching
+from .consensus import LLMConsensus
+
+class LLMRouting:
+    """
+    A class for dynamic routing of tasks to different LLM-based workflows.
+
+    Available Routes:
+    - Route 0: Regular route
+    - Route 1: LLMBranching with consolidation
+    - Route 2: LLMConsensus
+    - Route 3: Prompt reformulator
+    - Route 4: Prompt to inline
+
+    Attributes:
+        route (int): The selected routing strategy.
+        bots: Container for different LLM bots.
+        main_bot (LLM): The main bot instance for processing queries.
+        query (str): Input query to be processed.
+        remove_chat (bool): Flag to determine whether to remove chat history after processing.
+        verbose (bool): Enable detailed logs.
+    """
+
+    def __init__(self, route, bots, main_bot, query, remove_chat=False, verbose=False):
+        """
+        Initialize the LLMRouting class with the specified route and parameters.
+
+        Args:
+            route (int): The selected routing strategy.
+            bots: Container for different LLM bots.
+            main_bot (LLM): The main bot instance for processing queries.
+            query (str): Input query to be processed.
+            remove_chat (bool): Whether to remove chat history after processing.
+            verbose (bool): Enable detailed logs.
+        """
+        self.route = route
+        self.bots = bots
+        self.main_bot = main_bot
+        self.query = query
+        self.remove_chat = remove_chat
+        self.verbose = verbose
+
+    def call(self, _bot, _query):
+        """
+        Process a query using the specified bot.
+
+        Args:
+            _bot (LLM): The bot instance to use for processing.
+            _query (str): The query to process.
+
+        Returns:
+            str: The response from the bot.
+        """
+        response = _bot.chat(q=_query)
+        if self.remove_chat:
+            _bot.remove()
+        else:
+            _bot.add_response(response)
+
+        return response
+
+    def safe_str_to_int(self, s):
+        """
+        Safely convert a string to an integer by extracting numeric parts.
+
+        Args:
+            s (str): The string to convert.
+
+        Returns:
+            int: The extracted integer, or 0 if no valid number is found.
+        """
+        match = re.search(r"[-+]?\d*\.?\d+", s)
+        if match:
+            return int(float(match.group()))
+        return 0
+
+    def run(self):
+        """
+        Execute the selected routing strategy.
+
+        Returns:
+            str: The result of the routing workflow.
+        """
+        if self.route == 0:
+            # Route 0: Regular route
+            if self.verbose:
+                print('\nRunning Route 0: Regular route')
+            return self.call(self.main_bot, self.query)
+
+        elif self.route == 1:
+            # Route 1: LLMBranching with consolidation
+            if self.verbose:
+                print('\nRunning Route 1: LLMBranching with consolidation')
+
+            swarm_clients = [v for k, v in getattr(self.bots, self.main_bot.team).__dict__.items() if isinstance(v, LLM)]
+
+            swarm = LLMBranching(
+                query=self.query,
+                verbose=self.verbose,
+                clients=swarm_clients
+            )
+
+            responses = swarm.run()
+
+            query = f"""
+            Below is a query and a list of LLM agent's responses to that query. Your goal is to select the best response to the query.
+
+            Instructions:
+            Select only one response from the list and answer with the index of that response only.
+            The index starts at 0 for the first response.
+
+            ---
+
+            Task:
+            {self.query}
+
+            ---
+
+            Response:
+            {responses}
+
+            ---
+
+            Output only the number (index).
+
+            Example output: '7'.
+            """
+
+            consensus_swarm = LLMConsensus(
+                query=query,
+                verbose=True,
+                clients=swarm_clients
+            )
+
+            run_result = consensus_swarm.run()
+            index = self.safe_str_to_int(run_result)
+
+            try:
+                return responses[index]
+            except IndexError as e:
+                if self.verbose:
+                    print('IndexError:', e)
+                return "Error: Invalid response index."
+
+        elif self.route == 2:
+            # Route 2: LLMConsensus
+            if self.verbose:
+                print('\nRunning Route 2: LLMConsensus')
+
+            swarm_clients = [v for k, v in getattr(self.bots, self.main_bot.team).__dict__.items() if isinstance(v, LLM)]
+
+            swarm = LLMConsensus(
+                query=self.query,
+                verbose=self.verbose,
+                clients=swarm_clients
+            )
+
+            return swarm.run()
+
+        elif self.route == 3:
+            # Route 3: Prompt reformulator
+            if self.verbose:
+                print('\nRunning Route 3: Prompt reformulator')
+
+            response = self.call(self.bots.prompt.prompt_reformulator_llm, self.query)
+
+            if self.verbose:
+                print('\nUpdated query via route 3:', response)
+
+            return self.call(self.main_bot, response)
+
+        elif self.route == 4:
+            # Route 4: Prompt to inline
+            if self.verbose:
+                print('\nRunning Route 4: Prompt to inline')
+
+            response = self.call(self.bots.prompt.remarks_to_inline_bot, self.query)
+
+            if self.verbose:
+                print('\nUpdated query via route 4:', response)
+
+            return self.call(self.main_bot, response)
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/examples/__init__.py
+--------------------------------------------------------------------------------
+
+
+
+
+
+--------------------------------------------------------------------------------
+File: synapse/memory/__init__.py
+--------------------------------------------------------------------------------
+
+
+
+
+
+--------------------------------------------------------------------------------
+File: tests/__init__.py
+--------------------------------------------------------------------------------
+
+
+
+
