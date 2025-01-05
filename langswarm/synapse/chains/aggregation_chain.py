@@ -46,7 +46,7 @@ class AggregationChain(Chain):
         - dict: Dictionary containing the aggregated result.
         """
         query = inputs["query"]
-        hb = inputs["hb"]
+        hb = inputs.get("hb")
         self.aggregation.query = query
         result = self.aggregation.run(hb)
         return {"aggregated_result": result}
