@@ -21,12 +21,24 @@ class LangSwarmRoutingTool(Tool):
         - main_bot: The primary bot for routing decisions.
         - kwargs: Additional parameters for the LLMRouting class.
         """
+        self._route = route
+        self._bots = bots
+        self._main_bot = main_bot
+        self._kwargs = kwargs
         super().__init__(
             name="LangSwarm Routing",
             func=self.run,
             description="A tool to dynamically route tasks to the appropriate agents."
         )
-        self.routing = LLMRouting(route=route, bots=bots, main_bot=main_bot, **kwargs)
+
+    @property
+    def routing(self):
+        """
+        Lazy-loads and returns an instance.
+        """
+        if not hasattr(self, "_routing"):
+            self._routing = LLMRouting(route=self._route, bots=self._bots, main_bot=self._main_bot, **self._kwargs)
+        return self._routing
 
     def run(self, query):
         """
