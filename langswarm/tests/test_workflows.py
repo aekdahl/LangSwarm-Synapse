@@ -1,4 +1,4 @@
-from synapse.interface.templates import Templates
+from langswarm.synapse.interface.templates import Templates
 from unittest.mock import MagicMock
 import pytest
 
