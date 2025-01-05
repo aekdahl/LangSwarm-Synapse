@@ -28,7 +28,7 @@ class AggregationChain(Chain):
     @property
     def input_keys(self):
         """Define input keys for the chain."""
-        return ["query", "hb"]
+        return ["query"]
 
     @property
     def output_keys(self):
