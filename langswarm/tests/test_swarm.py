@@ -1,5 +1,5 @@
 import pytest
-from synapse.swarm.swarm import Swarm
+from langswarm.synapse.swarm.swarm import Swarm
 from sentence_transformers import SentenceTransformer
 from unittest.mock import MagicMock
 
