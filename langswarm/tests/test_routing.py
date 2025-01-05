@@ -12,7 +12,7 @@ def test_routing_workflow(mock_agents):
     tool = LangSwarmRoutingTool(route=2, bots=mock_agents, main_bot=main_bot, query="Define AI.")
     tool.routing.run = MagicMock(return_value="Consensus Result")
 
-    result = tool.run()
+    result = tool.run("Define AI.")
     assert result == "Consensus Result"
 
 def test_routing_chain(mock_agents):
