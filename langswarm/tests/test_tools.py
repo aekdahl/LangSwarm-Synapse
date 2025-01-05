@@ -1,5 +1,6 @@
 from langswarm.synapse.tools.consensus_tool import LangSwarmConsensusTool
 from langswarm.synapse.tools.voting_tool import LangSwarmVotingTool
+from unittest.mock import MagicMock
 import pytest
 
 @pytest.fixture
