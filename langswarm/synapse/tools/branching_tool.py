@@ -8,9 +8,14 @@ Purpose:
 """
 
 from langchain.tools import Tool
-from langswarm.swarm.branching import LLMBranching
+from langchain.pydantic_v1 import Extra
+from langswarm.synapse.swarm.branching import LLMBranching
+
 
 class LangSwarmBranchingTool(Tool):
+    class Config:
+      extra = Extra.allow
+        
     def __init__(self, agents, **kwargs):
         """
         Initializes the LangSwarmBranchingTool.
@@ -19,11 +24,11 @@ class LangSwarmBranchingTool(Tool):
         - agents (list): List of agents to use in the branching process.
         - kwargs: Additional parameters for the LLMBranching class.
         """
-        self.branching = LLMBranching(clients=agents, **kwargs)
         super().__init__(
             name="LangSwarm Branching",
             func=self.run,
-            description="A tool to generate multiple responses from a set of agents."
+            description="A tool to generate multiple responses from a set of agents.",
+            branching = LLMBranching(clients=agents, **kwargs)
         )
 
     def run(self, query):

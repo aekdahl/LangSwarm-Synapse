@@ -8,9 +8,13 @@ Purpose:
 """
 
 from langchain.chains.base import Chain
-from langswarm.swarm.branching import LLMBranching
+from langchain.pydantic_v1 import Extra
+from langswarm.synapse.swarm.branching import LLMBranching
 
 class BranchingChain(Chain):
+    class Config:
+      extra = Extra.allow
+
     def __init__(self, agents, **kwargs):
         """
         Initializes the BranchingChain.
@@ -19,8 +23,8 @@ class BranchingChain(Chain):
         - agents (list): List of agents to use in the branching process.
         - kwargs: Additional parameters for the LLMBranching class.
         """
-        self.branching = LLMBranching(clients=agents, **kwargs)
-
+        super().__init__(branching = LLMBranching(clients=agents, **kwargs))
+        
     @property
     def input_keys(self):
         """Define input keys for the chain."""

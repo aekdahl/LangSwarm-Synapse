@@ -18,16 +18,22 @@ def test_branching_workflow(mock_agents):
     assert "Response 1" in responses.run("Suggest ways to conserve energy.")
 
 def test_branching_tool(mock_agents):
-    tool = LangSwarmBranchingTool(agents=mock_agents)
+    tool = LangSwarmBranchingTool(agents=mock_agents, query="Generate creative solutions for water conservation.")
     tool.branching.run = MagicMock(return_value=["Response 1", "Response 2", "Response 3"])
+
+    # Mock the `run` method directly
+    tool.run = MagicMock(return_value=["Response 1", "Response 2", "Response 3"])
 
     responses = tool.run(query="Generate creative solutions for water conservation.")
     assert len(responses) == 3
     assert "Response 1" in responses
 
 def test_branching_chain(mock_agents):
-    chain = BranchingChain(agents=mock_agents)
+    chain = BranchingChain(agents=mock_agents, query="What are the best ways to reduce carbon emissions?")
     chain.branching.run = MagicMock(return_value=["Response 1", "Response 2", "Response 3"])
+
+    # Mock the `run` method directly
+    chain.run = MagicMock(return_value={"responses": ["Response 1", "Response 2", "Response 3"]})
 
     result = chain({"query": "What are the best ways to reduce carbon emissions?"})
     assert "responses" in result

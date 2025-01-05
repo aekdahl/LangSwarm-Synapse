@@ -8,9 +8,13 @@ Purpose:
 """
 
 from langchain.chains.base import Chain
-from langswarm.swarm.routing import LLMRouting
+from langchain.pydantic_v1 import Extra
+from langswarm.synapse.swarm.routing import LLMRouting
 
 class RoutingChain(Chain):
+    class Config:
+      extra = Extra.allow
+        
     def __init__(self, route, bots, main_bot, **kwargs):
         """
         Initializes the RoutingChain.
@@ -21,7 +25,7 @@ class RoutingChain(Chain):
         - main_bot: The primary bot for routing decisions.
         - kwargs: Additional parameters for the LLMRouting class.
         """
-        self.routing = LLMRouting(route=route, bots=bots, main_bot=main_bot, **kwargs)
+        super().__init__(routing = LLMRouting(route=route, bots=bots, main_bot=main_bot, **kwargs))
 
     @property
     def input_keys(self):

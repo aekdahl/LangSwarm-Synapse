@@ -1,6 +1,5 @@
 import re
 
-from ..bot import LLM
 from .swarm import Swarm
 from .branching import LLMBranching
 from .consensus import LLMConsensus
@@ -96,12 +95,10 @@ class LLMRouting:
             if self.verbose:
                 print('\nRunning Route 1: LLMBranching with consolidation')
 
-            swarm_clients = [v for k, v in getattr(self.bots, self.main_bot.team).__dict__.items() if isinstance(v, LLM)]
-
             swarm = LLMBranching(
                 query=self.query,
                 verbose=self.verbose,
-                clients=swarm_clients
+                clients=self.bots
             )
 
             responses = swarm.run()
@@ -133,7 +130,7 @@ class LLMRouting:
             consensus_swarm = LLMConsensus(
                 query=query,
                 verbose=True,
-                clients=swarm_clients
+                clients=self.bots
             )
 
             run_result = consensus_swarm.run()
@@ -151,12 +148,10 @@ class LLMRouting:
             if self.verbose:
                 print('\nRunning Route 2: LLMConsensus')
 
-            swarm_clients = [v for k, v in getattr(self.bots, self.main_bot.team).__dict__.items() if isinstance(v, LLM)]
-
             swarm = LLMConsensus(
                 query=self.query,
                 verbose=self.verbose,
-                clients=swarm_clients
+                clients=self.bots
             )
 
             return swarm.run()

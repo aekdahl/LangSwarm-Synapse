@@ -8,9 +8,13 @@ Purpose:
 """
 
 from langchain.tools import Tool
-from langswarm.swarm.aggregation import LLMAggregation
+from langchain.pydantic_v1 import Extra
+from langswarm.synapse.swarm.aggregation import LLMAggregation
 
 class LangSwarmAggregationTool(Tool):
+    class Config:
+      extra = Extra.allow
+        
     def __init__(self, agents, **kwargs):
         """
         Initializes the LangSwarmAggregationTool.
@@ -19,11 +23,12 @@ class LangSwarmAggregationTool(Tool):
         - agents (list): List of agents to use in the aggregation process.
         - kwargs: Additional parameters for the LLMAggregation class.
         """
-        self.aggregation = LLMAggregation(clients=agents, **kwargs)
+        #self.aggregation = LLMAggregation(clients=agents, **kwargs)
         super().__init__(
             name="LangSwarm Aggregation",
             func=self.run,
-            description="A tool to merge and aggregate responses from multiple agents."
+            description="A tool to merge and aggregate responses from multiple agents.",
+            aggregation=LLMAggregation(clients=agents, **kwargs)
         )
 
     def run(self, query, hb):

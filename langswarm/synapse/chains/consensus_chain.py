@@ -8,9 +8,13 @@ Purpose:
 """
 
 from langchain.chains.base import Chain
-from langswarm.swarm.consensus import LLMConsensus
+from langchain.pydantic_v1 import Extra
+from langswarm.synapse.swarm.consensus import LLMConsensus
 
 class ConsensusChain(Chain):
+    class Config:
+      extra = Extra.allow
+        
     def __init__(self, agents, **kwargs):
         """
         Initializes the ConsensusChain.
@@ -19,7 +23,7 @@ class ConsensusChain(Chain):
         - agents (list): List of agents to use in the consensus process.
         - kwargs: Additional parameters for the LLMConsensus class.
         """
-        self.consensus = LLMConsensus(clients=agents, **kwargs)
+        super().__init__(consensus = LLMConsensus(clients=agents, **kwargs))
 
     @property
     def input_keys(self):
