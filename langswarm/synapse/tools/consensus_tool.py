@@ -6,16 +6,13 @@ Purpose:
 - Integrates LLMConsensus into LangChain workflows as a reusable tool.
 - Allows developers to use consensus-building as a modular step in pipelines.
 """
-
 from langchain.tools import Tool
+from langchain.pydantic_v1 import Extra
 from langswarm.synapse.swarm.consensus import LLMConsensus
 
 class LangSwarmConsensusTool(Tool):
     class Config:
-        """
-        Configure the tool to allow extra fields.
-        """
-        extra = "allow"  # Permit extra attributes
+      extra = Extra.allow
         
     def __init__(self, agents, **kwargs):
         """
@@ -25,11 +22,11 @@ class LangSwarmConsensusTool(Tool):
         - agents (list): List of agents to use in the consensus process.
         - kwargs: Additional parameters for the LLMConsensus class.
         """
-        self.consensus = LLMConsensus(clients=agents, **kwargs)
         super().__init__(
             name="LangSwarm Consensus",
             func=self.run,
-            description="A tool to reach consensus among multiple agents for a given query."
+            description="A tool to reach consensus among multiple agents for a given query.",
+            consensus = LLMConsensus(clients=agents, **kwargs)
         )
 
     def run(self, query):
