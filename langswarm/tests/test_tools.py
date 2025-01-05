@@ -8,7 +8,7 @@ def mock_agents():
     return [MagicMock() for _ in range(3)]
     
 def test_consensus_tool(mock_agents):
-    tool = LangSwarmConsensusTool(agents=mock_agents)
+    tool = LangSwarmConsensusTool(agents=mock_agents, query="Explain the benefits of AI.")
     tool.consensus.run = MagicMock(return_value="Consensus Response")
 
     # Provide the query during .run
@@ -16,7 +16,7 @@ def test_consensus_tool(mock_agents):
     assert result == "Consensus Response"
     
 def test_voting_tool(mock_agents):
-    tool = LangSwarmVotingTool(agents=mock_agents)
+    tool = LangSwarmVotingTool(agents=mock_agents, query="What is the most effective renewable energy?")
     tool.voting.run = MagicMock(return_value="Voting Response")
 
     # Provide the query during .run
