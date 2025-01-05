@@ -19,12 +19,12 @@ class LangSwarmVotingTool(Tool):
         - agents (list): List of agents to use in the voting process.
         - kwargs: Additional parameters for the LLMVoting class.
         """
-        self.voting = LLMVoting(clients=agents, **kwargs)
         super().__init__(
             name="LangSwarm Voting",
             func=self.run,
             description="A tool to enable voting-based decision-making among agents."
         )
+        self.voting = LLMVoting(clients=agents, **kwargs)
 
     def run(self, query):
         """
