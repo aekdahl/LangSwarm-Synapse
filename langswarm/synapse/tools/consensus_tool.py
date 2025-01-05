@@ -8,7 +8,7 @@ Purpose:
 """
 
 from langchain.tools import Tool
-from langswarm.swarm.consensus import LLMConsensus
+from langswarm.synapse.swarm.consensus import LLMConsensus
 
 class LangSwarmConsensusTool(Tool):
     def __init__(self, agents, **kwargs):
