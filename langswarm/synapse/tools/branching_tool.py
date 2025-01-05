@@ -19,12 +19,12 @@ class LangSwarmBranchingTool(Tool):
         - agents (list): List of agents to use in the branching process.
         - kwargs: Additional parameters for the LLMBranching class.
         """
-        self.branching = LLMBranching(clients=agents, **kwargs)
         super().__init__(
             name="LangSwarm Branching",
             func=self.run,
             description="A tool to generate multiple responses from a set of agents."
         )
+        self.branching = LLMBranching(clients=agents, **kwargs)
 
     def run(self, query):
         """
