@@ -8,7 +8,7 @@ Purpose:
 """
 
 from langchain.tools import Tool
-from langswarm.swarm.voting import LLMVoting
+from langswarm.synapse.swarm.voting import LLMVoting
 
 class LangSwarmVotingTool(Tool):
     def __init__(self, agents, **kwargs):
