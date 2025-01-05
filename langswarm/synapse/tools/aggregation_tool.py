@@ -8,14 +8,12 @@ Purpose:
 """
 
 from langchain.tools import Tool
+from langchain.pydantic_v1 import Extra
 from langswarm.synapse.swarm.aggregation import LLMAggregation
 
 class LangSwarmAggregationTool(Tool):
     class Config:
-        """
-        Configure the tool to allow extra fields.
-        """
-        extra = "allow"  # Permit extra attributes
+      extra = Extra.allow
         
     def __init__(self, agents, **kwargs):
         """
