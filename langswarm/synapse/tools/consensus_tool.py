@@ -19,12 +19,22 @@ class LangSwarmConsensusTool(Tool):
         - agents (list): List of agents to use in the consensus process.
         - kwargs: Additional parameters for the LLMConsensus class.
         """
+        self._agents = agents
+        self._kwargs = kwargs
         super().__init__(
             name="LangSwarm Consensus",
             func=self.run,
             description="A tool to reach consensus among multiple agents for a given query."
         )
-        self.consensus = LLMConsensus(clients=agents, **kwargs)
+
+    @property
+    def consensus(self):
+        """
+        Lazy-loads and returns an instance.
+        """
+        if not hasattr(self, "_consensus"):
+            self._consensus = LLMConsensus(clients=self._agents, **self._kwargs)
+        return self._consensus
 
     def run(self, query):
         """
