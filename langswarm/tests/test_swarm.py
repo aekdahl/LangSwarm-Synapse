@@ -15,12 +15,14 @@ def test_check_initialization(swarm_instance):
     assert swarm_instance.check_initialization() == True
 
 def test_dynamic_threshold_valid():
+    swarm = Swarm()  # Properly initialize the Swarm instance
     global_similarity = 0.75
     threshold = 0.8
     adjustment_factor = 0.8
-    result = Swarm.dynamic_threshold(global_similarity, threshold, adjustment_factor)
-    expected = 0.76  # Update expected value based on recalculated logic
-    assert abs(result - expected) < 0.01  # Allow for small floating-point variance
+
+    result = swarm.dynamic_threshold(global_similarity, threshold, adjustment_factor)
+    expected = 0.76  # Expected value
+    assert abs(result - expected) < 0.01  # Allow for floating-point variance
 
 def test_dynamic_threshold_invalid_inputs(swarm_instance):
     with pytest.raises(ValueError):
