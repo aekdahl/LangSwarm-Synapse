@@ -8,7 +8,7 @@ Purpose:
 """
 
 from langchain.chains.base import Chain
-from langswarm.swarm.voting import LLMVoting
+from langswarm.synapse.swarm.voting import LLMVoting
 
 class VotingChain(Chain):
     def __init__(self, agents, **kwargs):
