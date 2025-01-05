@@ -8,7 +8,7 @@ Purpose:
 """
 
 from langchain.chains.base import Chain
-from langswarm.swarm.consensus import LLMConsensus
+from langswarm.synapse.swarm.consensus import LLMConsensus
 
 class ConsensusChain(Chain):
     def __init__(self, agents, **kwargs):
