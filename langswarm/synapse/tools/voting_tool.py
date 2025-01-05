@@ -19,12 +19,23 @@ class LangSwarmVotingTool(Tool):
         - agents (list): List of agents to use in the voting process.
         - kwargs: Additional parameters for the LLMVoting class.
         """
+        self._agents = agents
+        self._kwargs = kwargs
         super().__init__(
             name="LangSwarm Voting",
             func=self.run,
             description="A tool to enable voting-based decision-making among agents."
         )
-        self.voting = LLMVoting(clients=agents, **kwargs)
+
+    @property
+    def voting(self):
+        """
+        Lazy-loads and returns an instance of LLMVoting.
+        """
+        if not hasattr(self, "_voting"):
+            # Instantiate LLMVoting only when accessed
+            self._voting = LLMVoting(clients=self._agents, **self._kwargs)
+        return self._voting
 
     def run(self, query):
         """
