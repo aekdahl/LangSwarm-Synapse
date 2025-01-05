@@ -8,9 +8,13 @@ Purpose:
 """
 
 from langchain.chains.base import Chain
+from langchain.pydantic_v1 import Extra
 from langswarm.synapse.swarm.voting import LLMVoting
 
 class VotingChain(Chain):
+    class Config:
+      extra = Extra.allow
+        
     def __init__(self, agents, **kwargs):
         """
         Initializes the VotingChain.
@@ -19,7 +23,7 @@ class VotingChain(Chain):
         - agents (list): List of agents to use in the voting process.
         - kwargs: Additional parameters for the LLMVoting class.
         """
-        self.voting = LLMVoting(clients=agents, **kwargs)
+        super().__init__(voting = LLMVoting(clients=agents, **kwargs))
 
     @property
     def input_keys(self):
