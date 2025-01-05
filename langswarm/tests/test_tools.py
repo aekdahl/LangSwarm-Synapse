@@ -1,5 +1,5 @@
-from synapse.tools.consensus_tool import LangSwarmConsensusTool
-from synapse.tools.voting_tool import LangSwarmVotingTool
+from langswarm.synapse.tools.consensus_tool import LangSwarmConsensusTool
+from langswarm.synapse.tools.voting_tool import LangSwarmVotingTool
 import pytest
 
 @pytest.fixture
