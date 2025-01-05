@@ -23,11 +23,12 @@ class LangSwarmAggregationTool(Tool):
         - agents (list): List of agents to use in the aggregation process.
         - kwargs: Additional parameters for the LLMAggregation class.
         """
-        self.aggregation = LLMAggregation(clients=agents, **kwargs)
+        #self.aggregation = LLMAggregation(clients=agents, **kwargs)
         super().__init__(
             name="LangSwarm Aggregation",
             func=self.run,
-            description="A tool to merge and aggregate responses from multiple agents."
+            description="A tool to merge and aggregate responses from multiple agents.",
+            aggregation=LLMAggregation(clients=agents, **kwargs)
         )
 
     def run(self, query, hb):
