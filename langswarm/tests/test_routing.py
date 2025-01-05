@@ -17,7 +17,7 @@ def test_routing_workflow(mock_agents):
 
 def test_routing_chain(mock_agents):
     main_bot = MagicMock()
-    chain = RoutingChain(route=1, bots=mock_agents, main_bot=main_bot)
+    chain = RoutingChain(route=1, bots=mock_agents, main_bot=main_bot, query="What are the ethical considerations of AI?")
     chain.routing.run = MagicMock(return_value="Branching Result")
 
     result = chain({"query": "What are the ethical considerations of AI?"})
