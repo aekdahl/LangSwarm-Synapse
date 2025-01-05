@@ -1,5 +1,5 @@
-from synapse.tools.routing_tool import LangSwarmRoutingTool
-from synapse.chains.routing_chain import RoutingChain
+from langswarm.synapse.tools.routing_tool import LangSwarmRoutingTool
+from langswarm.synapse.chains.routing_chain import RoutingChain
 from unittest.mock import MagicMock
 import pytest
 

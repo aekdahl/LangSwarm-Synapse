@@ -1,6 +1,6 @@
-from synapse.interface.templates import Templates
-from synapse.tools.branching_tool import LangSwarmBranchingTool
-from synapse.chains.branching_chain import BranchingChain
+from langswarm.synapse.interface.templates import Templates
+from langswarm.synapse.tools.branching_tool import LangSwarmBranchingTool
+from langswarm.synapse.chains.branching_chain import BranchingChain
 from unittest.mock import MagicMock
 import pytest
 

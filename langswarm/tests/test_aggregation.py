@@ -1,6 +1,6 @@
-from synapse.interface.templates import Templates
-from synapse.tools.aggregation_tool import LangSwarmAggregationTool
-from synapse.chains.aggregation_chain import AggregationChain
+from langswarm.synapse.interface.templates import Templates
+from langswarm.synapse.tools.aggregation_tool import LangSwarmAggregationTool
+from langswarm.synapse.chains.aggregation_chain import AggregationChain
 from unittest.mock import MagicMock
 import pytest
 
