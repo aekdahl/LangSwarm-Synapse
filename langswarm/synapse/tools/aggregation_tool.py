@@ -11,6 +11,12 @@ from langchain.tools import Tool
 from langswarm.synapse.swarm.aggregation import LLMAggregation
 
 class LangSwarmAggregationTool(Tool):
+    class Config:
+        """
+        Configure the tool to allow extra fields.
+        """
+        extra = "allow"  # Permit extra attributes
+        
     def __init__(self, agents, **kwargs):
         """
         Initializes the LangSwarmAggregationTool.
@@ -19,22 +25,12 @@ class LangSwarmAggregationTool(Tool):
         - agents (list): List of agents to use in the aggregation process.
         - kwargs: Additional parameters for the LLMAggregation class.
         """
-        self._agents = agents
-        self._kwargs = kwargs
+        self.aggregation = LLMAggregation(clients=agents, **kwargs)
         super().__init__(
             name="LangSwarm Aggregation",
             func=self.run,
             description="A tool to merge and aggregate responses from multiple agents."
         )
-
-    @property
-    def aggregation(self):
-        """
-        Lazy-loads and returns an instance.
-        """
-        if not hasattr(self, "_aggregation"):
-            self._aggregation = LLMAggregation(clients=self._agents, **self._kwargs)
-        return self._aggregation
 
     def run(self, query, hb):
         """
