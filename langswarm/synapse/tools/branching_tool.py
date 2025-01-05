@@ -8,7 +8,7 @@ Purpose:
 """
 
 from langchain.tools import Tool
-from langswarm.swarm.branching import LLMBranching
+from langswarm.synapse.swarm.branching import LLMBranching
 
 class LangSwarmBranchingTool(Tool):
     def __init__(self, agents, **kwargs):
