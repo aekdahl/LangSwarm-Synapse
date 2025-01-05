@@ -8,7 +8,7 @@ Purpose:
 """
 
 from langchain.chains.base import Chain
-from langswarm.swarm.routing import LLMRouting
+from langswarm.synapse.swarm.routing import LLMRouting
 
 class RoutingChain(Chain):
     def __init__(self, route, bots, main_bot, **kwargs):
