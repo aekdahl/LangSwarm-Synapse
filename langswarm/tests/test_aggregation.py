@@ -17,14 +17,14 @@ def test_aggregation_workflow(mock_agents):
     assert result.run("Summarize the effects of global warming.") == "Aggregated Result"
 
 def test_aggregation_tool(mock_agents):
-    tool = LangSwarmAggregationTool(agents=mock_agents)
+    tool = LangSwarmAggregationTool(agents=mock_agents, query="What are the benefits of sustainable farming?")
     tool.aggregation.run = MagicMock(return_value="Aggregated Result")
 
     result = tool.run(query="What are the benefits of sustainable farming?", hb=None)
     assert result == "Aggregated Result"
 
 def test_aggregation_chain(mock_agents):
-    chain = AggregationChain(agents=mock_agents)
+    chain = AggregationChain(agents=mock_agents, query="Summarize the advancements in renewable energy.")
     chain.aggregation.run = MagicMock(return_value="Aggregated Summary")
 
     result = chain({"query": "Summarize the advancements in renewable energy."})
