@@ -8,7 +8,7 @@ Purpose:
 """
 
 from langchain.chains.base import Chain
-from langswarm.swarm.aggregation import LLMAggregation
+from langswarm.synapse.swarm.aggregation import LLMAggregation
 
 class AggregationChain(Chain):
     def __init__(self, agents, **kwargs):
