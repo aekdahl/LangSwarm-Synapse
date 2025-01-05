@@ -6,11 +6,14 @@ Purpose:
 - Provides a reusable chain for aggregation workflows within LangChain.
 - Enables chaining aggregation with other tools or agents in pipelines.
 """
-
 from langchain.chains.base import Chain
+from langchain.pydantic_v1 import Extra
 from langswarm.synapse.swarm.aggregation import LLMAggregation
 
 class AggregationChain(Chain):
+    class Config:
+      extra = Extra.allow
+
     def __init__(self, agents, **kwargs):
         """
         Initializes the AggregationChain.
@@ -19,7 +22,8 @@ class AggregationChain(Chain):
         - agents (list): List of agents to use in the aggregation process.
         - kwargs: Additional parameters for the LLMAggregation class.
         """
-        self.aggregation = LLMAggregation(clients=agents, **kwargs)
+        #self.aggregation = LLMAggregation(clients=agents, **kwargs)
+        super().__init__(aggregation = LLMAggregation(clients=agents, **kwargs))
 
     @property
     def input_keys(self):
