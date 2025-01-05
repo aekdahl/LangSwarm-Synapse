@@ -1,6 +1,5 @@
 import re
 
-from ..bot import LLM
 from .swarm import Swarm
 from .branching import LLMBranching
 from .consensus import LLMConsensus
