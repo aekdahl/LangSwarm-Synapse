@@ -374,10 +374,11 @@ class Swarm:
             best_paragraph = "No consensus could be determined."
             highest_similarity = 0
             group_size_of_best = 0
-    
+
+        best_paragraph = best_paragraph or "No consensus could be determined."
+        highest_similarity = highest_similarity if highest_similarity >= 0 else 0
+        
         return best_paragraph, highest_similarity, group_size_of_best
-
-
 
     def run(self):
         """
