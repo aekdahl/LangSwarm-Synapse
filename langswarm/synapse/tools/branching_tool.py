@@ -11,6 +11,12 @@ from langchain.tools import Tool
 from langswarm.synapse.swarm.branching import LLMBranching
 
 class LangSwarmBranchingTool(Tool):
+    class Config:
+        """
+        Configure the tool to allow extra fields.
+        """
+        extra = "allow"  # Permit extra attributes
+        
     def __init__(self, agents, **kwargs):
         """
         Initializes the LangSwarmBranchingTool.
@@ -19,22 +25,12 @@ class LangSwarmBranchingTool(Tool):
         - agents (list): List of agents to use in the branching process.
         - kwargs: Additional parameters for the LLMBranching class.
         """
-        self._agents = agents
-        self._kwargs = kwargs
+        self.branching = LLMBranching(clients=agents, **kwargs)
         super().__init__(
             name="LangSwarm Branching",
             func=self.run,
             description="A tool to generate multiple responses from a set of agents."
         )
-
-    @property
-    def branching(self):
-        """
-        Lazy-loads and returns an instance.
-        """
-        if not hasattr(self, "_branching"):
-            self._branching = LLMBranching(clients=self._agents, **self._kwargs)
-        return self._branching
 
     def run(self, query):
         """
