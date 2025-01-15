@@ -1,3 +1,4 @@
+from ..tools.base import BaseTool
 from langswarm.memory import ChromaDBAdapter
 from typing import List
 
