@@ -1,50 +1,98 @@
 import os
-from typing import List, Dict
-from adapters import DatabaseAdapter  # Assuming we already have adapters implemented
-from abc import ABC
+from typing import Dict, List
+import json
 
 
-class CodebaseIndexer(BaseTool, ABC):
-    def __init__(self, name="Codebase Indexer", description="Extracts all files in a directory and indexes them."):
+class CodebaseIndexer(BaseTool):
+    """
+    Tool for indexing a codebase by querying the database for metadata and creating a file/folder structure.
+    """
+    def __init__(self, name="Codebase Indexer", description="Indexes file and folder structures from a database query."):
         super().__init__(name, description)
 
-    def use(self, base_path: str, adapter: DatabaseAdapter, file_extensions: List[str] = None) -> List[Dict]:
+    def use(self, adapter, query: Dict = None, output_format: str = "dict") -> Dict:
         """
-        Indexes the codebase, extracting file details and processing them with the given adapter.
+        Indexes the codebase by fetching metadata from the database and building a file/folder structure.
 
         Args:
-            base_path (str): The base directory to start indexing.
-            adapter (DatabaseAdapter): The adapter used to retrieve and process file data.
-            file_extensions (List[str], optional): List of file extensions to include. If None, includes all files.
+            adapter (DatabaseAdapter): The adapter used to query the database.
+            query (Dict, optional): Pre-written query to fetch metadata.
+            output_format (str): Output format of the index. Options: "dict", "json". Defaults to "dict".
 
         Returns:
-            List[Dict]: A list of indexed file details.
+            Dict: A nested dictionary representing the file/folder structure.
         """
-        if not os.path.isdir(base_path):
-            raise ValueError(f"Provided path '{base_path}' is not a valid directory.")
+        if not isinstance(adapter, DatabaseAdapter):
+            raise ValueError("The adapter must be an instance of DatabaseAdapter.")
 
-        indexed_files = []
-        for root, _, files in os.walk(base_path):
-            for file in files:
-                if file_extensions and not file.endswith(tuple(file_extensions)):
-                    continue
+        # Step 1: Query the database for metadata
+        try:
+            metadata_results = adapter.query(query=query)
+        except Exception as e:
+            raise RuntimeError(f"Failed to fetch metadata from the database: {e}")
 
-                file_path = os.path.join(root, file)
-                try:
-                    # Retrieve file content
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        content = f.read()
+        if not metadata_results:
+            raise ValueError("No metadata retrieved from the database.")
 
-                    # Use the adapter to process the file content
-                    file_data = adapter.add_documents([{"text": content, "metadata": {"path": file_path}}])
+        # Step 2: Build the file/folder structure
+        file_structure = self._build_file_structure(metadata_results)
 
-                    # Add to the index
-                    indexed_files.append({
-                        "file_path": file_path,
-                        "content": content,
-                        "metadata": adapter.query_by_metadata({"path": file_path}),
-                    })
-                except Exception as e:
-                    print(f"Error processing file '{file_path}': {e}")
+        # Step 3: Output the index
+        if output_format == "json":
+            return json.dumps(file_structure, indent=2)
+        elif output_format == "dict":
+            return file_structure
+        else:
+            raise ValueError("Invalid output_format. Choose 'dict' or 'json'.")
 
-        return indexed_files
+    def _build_file_structure(self, metadata_results: List[Dict]) -> Dict:
+        """
+        Builds a nested file/folder structure from metadata results.
+
+        Args:
+            metadata_results (List[Dict]): Metadata results from the database query.
+
+        Returns:
+            Dict: A nested dictionary representing the file/folder structure.
+        """
+        file_structure = {}
+
+        for record in metadata_results:
+            # Extract the file path from metadata
+            file_path = record.get("metadata", {}).get("path", "")
+            if not file_path:
+                continue
+
+            # Break the path into components
+            path_parts = file_path.split(os.sep)
+
+            # Recursively build the nested dictionary structure
+            current_level = file_structure
+            for part in path_parts:
+                if part not in current_level:
+                    current_level[part] = {}
+                current_level = current_level[part]
+
+        return file_structure
+
+"""
+from adapters.pinecone_adapter import PineconeAdapter
+
+# Initialize the adapter
+adapter = PineconeAdapter(api_key="your_api_key", environment="your_env", index_name="your_index_name")
+
+# Initialize the indexer tool
+indexer = CodebaseIndexer()
+
+# Define the pre-written query to fetch only metadata
+query = {"file_type": "code"}  # Adjust this query as per the database schema
+
+# Run the tool to generate the file and folder structure
+file_structure = indexer.use(adapter=adapter, query=query, output_format="dict")
+
+# Print the file structure
+print("File Structure:")
+for folder, sub_structure in file_structure.items():
+    print(f"{folder}: {sub_structure}")
+
+"""
