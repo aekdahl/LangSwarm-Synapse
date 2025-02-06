@@ -1,65 +1,113 @@
-from ..tools.base import BaseTool
-from langswarm.memory import ChromaDBAdapter
-from typing import List
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import SentenceTransformer
+
 
 class ToolRegistry:
-    def __init__(self, collection_name="tools_registry", persist_directory=None):
-        """
-        Initialize the ToolRegistry with ChromaDBAdapter for scalable storage.
-        
-        :param collection_name: Name of the ChromaDB collection for tools.
-        :param persist_directory: Directory for persisting data (optional).
-        """
-        self.db_adapter = ChromaDBAdapter(collection_name=collection_name, persist_directory=persist_directory)
+    """
+    A registry for managing agent-specific tools with semantic search support.
+    Stores tools in a dictionary and uses embeddings for similarity-based queries.
+    """
 
-    def register_tool(self, tool: BaseTool):
+    def __init__(self, embedding_model=None):
         """
-        Register a tool in the ChromaDB collection.
+        Initialize the ToolRegistry.
+
+        :param embedding_model: A callable that generates embeddings for a given text.
+                                Defaults to SentenceTransformer's 'all-MiniLM-L6-v2'.
+        """
+        # Use the provided embedding model or load the default one
+        self.included_tools = set()  # Tracks tools already introduced
+        self.embedding_model = embedding_model or SentenceTransformer('all-MiniLM-L6-v2').encode
+        self.tools = {}
+        self.embeddings = {}
+
+    def register_tool(self, tool_name: str, tool):
+        """
+        Register a new tool and generate its embedding.
+
+        :param tool_name: Name of the tool to register.
+        :param tool: A callable object or function representing the tool. 
+                           It must have a `description` attribute.
+        :raises ValueError: If the tool is already registered or lacks a description.
+        """
+        if tool_name in self.tools:
+            raise ValueError(f"Tool '{tool_name}' is already registered.")
+        if not hasattr(tool, "description"):
+            raise ValueError(f"Tool '{tool_name}' must have a 'description' attribute.")
         
-        :param tool: BaseTool instance with attributes `name`, `description`, and optional `metadata`.
-        """
-        self.db_adapter.add_documents([{
-            "key": tool.name,
-            "text": tool.description,
-            "metadata": tool.metadata or {}
-        }])
-        print(f"Tool '{tool.name}' registered successfully.")
+        self.tools[tool_name] = tool
+        self.embeddings[tool_name] = self.embedding_model(tool.description)
 
     def get_tool(self, tool_name: str):
         """
         Retrieve a tool by its name.
 
         :param tool_name: Name of the tool to retrieve.
-        :return: Tool details if found, otherwise None.
+        :return: The registered tool if found, otherwise None.
         """
-        results = self.db_adapter.query(query=tool_name, filters={"key": tool_name}, top_k=1)
-        return results[0] if results else None
+        return self.tools.get(tool_name)
 
-    def list_tools(self) -> List[str]:
+    def count_tools(self):
         """
-        List all tool names in the registry.
-        
-        :return: List of tool names.
-        """
-        tools = self.db_adapter.query(query="", top_k=100)
-        return [tool["key"] for tool in tools]
+        Count all registered tools.
 
-    def query_tools(self, query: str, filters=None, top_k=5):
+        :return: A count of tools.
         """
-        Query tools based on a description or metadata filters.
-        
-        :param query: Query string to match tool descriptions.
-        :param filters: Metadata filters (optional).
-        :param top_k: Number of results to retrieve.
-        :return: List of matching tools.
-        """
-        return self.db_adapter.query(query=query, filters=filters, top_k=top_k)
+        return len(self.tools)
 
-    def delete_tool(self, tool_name: str):
+    def list_tools(self):
         """
-        Delete a tool by its name.
+        List all registered tools.
+
+        :return: A list of tool names.
+        """
+        return list(self.tools.keys())
+
+    def remove_tool(self, tool_name: str):
+        """
+        Remove a tool by its name.
+
+        :param tool_name: Name of the tool to remove.
+        :raises ValueError: If the tool does not exist.
+        """
+        if tool_name not in self.tools:
+            raise ValueError(f"Tool '{tool_name}' is not registered.")
+        del self.tools[tool_name]
+        del self.embeddings[tool_name]
+
+    def search_tools(self, query: str, top_k: int = 5):
+        """
+        Search for tools using semantic similarity based on their descriptions.
+
+        :param query: A string to match against tool descriptions.
+        :param top_k: Number of top results to return.
+        :return: A list of matching tools, sorted by similarity score.
+        """
+        query_embedding = self.embedding_model(query)
+        tool_names = list(self.embeddings.keys())
+        tool_embeddings = np.array([self.embeddings[name] for name in tool_names])
+
+        # Compute cosine similarity
+        similarities = cosine_similarity([query_embedding], tool_embeddings)[0]
+        ranked_indices = np.argsort(similarities)[::-1][:top_k]
+
+        # Mark these tools as included
+        self.included_tools.update([tool_names[i] for i in ranked_indices])
         
-        :param tool_name: Name of the tool to delete.
+        return [
+            {
+                "name": tool_names[i],
+                "description": self.tools[tool_names[i]].description,
+                "instruction": self.tools[tool_names[i]].instruction,
+                #"score": similarities[i],
+            }
+            for i in ranked_indices
+        ]
+
+    def reset_context(self):
         """
-        self.db_adapter.delete([tool_name])
-        print(f"Tool '{tool_name}' deleted successfully.")
+        Reset the included tools, clearing the context.
+        """
+        self.included_tools.clear()
+        print("Context reset: All included tools cleared.")
