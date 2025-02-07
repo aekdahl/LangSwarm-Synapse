@@ -398,7 +398,7 @@ Example:
         
         return json.dumps(files)
 
-    def _validate_filepath_format(self, text: str) -> None | str:
+    def _validate_filepath_format(self, text: str) -> Optional[str]:
         """
         Checks if the given text starts with a valid filepath and ensures it ends with a newline (\n).
 
