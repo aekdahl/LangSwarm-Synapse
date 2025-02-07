@@ -1,13 +1,13 @@
 from .base import BaseTool
 
-
 class TaskListTool(BaseTool):
     """
     A quick in-memory task list that optionally stores tasks in a vector database.
     """
 
-    def __init__(self, identifier):
+    def __init__(self, identifier, adapter=None):
         self.identifier = identifier
+        self.adapter = adapter  # Optional adapter for storing tasks in a vector database
         super().__init__(
             name="TaskListTool",
             description="""Use the TaskListTool to manage tasks in a simple in-memory list. It is useful for breaking down projects into small tasks, tracking progress, or coordinating multiple subtasks in a structured manner.""",
@@ -16,12 +16,14 @@ class TaskListTool(BaseTool):
     - `create_task`: Create a new task.
       - Parameters:
         - `description` (str): The text describing what needs to be done.
+        - `priority` (int): The priority of the task (lower numbers indicate higher priority).
         
     - `update_task`: Update the status or the description of the task.
       - Parameters:
         - `task_id` (str): The identifier of the task to update.
         - `description` (str | optional): A new description if you want to change it.
         - `completed` (bool | optional): Set to true or false to mark a task as finished or not.
+        - `priority` (int | optional): Update the task's priority.
 
     - `delete_task`: Delete a task.
       - Parameters:
@@ -39,14 +41,31 @@ class TaskListTool(BaseTool):
 Example:
 - To create a new task:
   ```
-  use tool:task_list|create_task|{"description": "Add docstring to function xyz"}
+  use tool:task_list|create_task|{"description": "Add docstring to function xyz", "priority": 1}
   ```
         """
         )
-        self.tasks = {}  # in-memory store, {task_id: {"description": str, "completed": bool, ...}}
+        self.tasks = {}  # in-memory store, {task_id: {"description": str, "completed": bool, "priority": int, ...}}
         self.next_id = 1
         
-    def run(self, payload = {}, action="list_tasks"):
+        # Load existing tasks from the adapter if available
+        if self.adapter:
+            self.load_existing_tasks()
+
+    def load_existing_tasks(self):
+        """
+        Load existing tasks from the adapter using the identifier as the key.
+        """
+        existing_tasks = self.adapter.query(query=self.identifier)
+        for task in existing_tasks:
+            self.tasks[task["key"]] = {
+                "description": task["text"],
+                "completed": task.get("completed", False),
+                "priority": task.get("priority", 1)  # Default priority if not set
+            }
+            self.next_id = max(self.next_id, int(task["key"].split("-")[1]) + 1)
+
+    def run(self, payload={}, action="list_tasks"):
         """
         Execute the tool's actions.
         :param payload: str or dict - The input query or tool details.
@@ -63,14 +82,14 @@ Example:
             return self.delete_task(**payload)
         else:
             return (
-                f"Unsupported action: {action}. Available actions are:\n\n"
+                f"Unsupported action: {action}. Available actions are:  "
                 f"{self.instruction}"
             )
 
-    def create_task(self, description):
+    def create_task(self, description, priority=1):
         """
         Create a new task.
-        Returns a dictionary with task_id, description, completed.
+        Returns a dictionary with task_id, description, completed, and priority.
         """
         task_id = f"task-{self.next_id}"
         self.next_id += 1
@@ -78,11 +97,24 @@ Example:
         task_data = {
             "task_id": task_id,
             "description": description,
-            "completed": False
+            "completed": False,
+            "priority": priority
         }
         self.tasks[task_id] = task_data
 
-        return f"New task created:\n\n {task_data}"
+        # Store the task in the adapter if provided
+        if self.adapter:
+            self.adapter.add_documents([{
+                "key": task_id,
+                "text": description,
+                "metadata": {
+                    "completed": False,
+                    "priority": priority,
+                    "identifier": self.identifier
+                }
+            }])
+
+        return f"New task created:   {task_data}"
 
     def update_task(self, task_id, **kwargs):
         """
@@ -94,10 +126,22 @@ Example:
             return None
 
         for key, value in kwargs.items():
-            if key in ["description", "completed"]:
+            if key in ["description", "completed", "priority"]:
                 task[key] = value
 
-        return f"New task created:\n\n {task}"
+        # Update the task in the adapter if provided
+        if self.adapter:
+            self.adapter.update({
+                "key": task_id,
+                "text": task["description"],
+                "metadata": {
+                    "completed": task["completed"],
+                    "priority": task["priority"],
+                    "identifier": self.identifier
+                }
+            })
+
+        return f"Updated task: {task}"
 
     def list_tasks(self):
         """
