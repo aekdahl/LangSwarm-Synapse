@@ -25,11 +25,13 @@ class GitHubTool(BaseTool):
     """
     def __init__(
         self, 
+        identifier,
         github_repository, 
         github_app_id, 
         github_app_private_key,
         adapter: Optional[Type[DatabaseAdapter]] = None
     ):
+        self.identifier = identifier
             
         if adapter is not None and not isinstance(adapter, DatabaseAdapter):
             raise TypeError(
@@ -170,7 +172,7 @@ Example:
         :return: str - Success message.
         """
         action = self.github_tool.set_active_branch(branch_name=branch)
-        print(action)
+        # print(action)
         return action
     
     def list_branches_in_repo(self):
@@ -179,7 +181,7 @@ Example:
         :return: str - String of branches.
         """
         action = self.github_tool.list_branches_in_repo()
-        print(action)
+        # print(action)
         return action
     
     def create_pull_request(self, pr_query):
@@ -194,7 +196,7 @@ Example:
             str: A success or failure message
         """
         action = self.github_tool.create_pull_request(pr_query)
-        print(action)
+        # print(action)
         return action
         
     def read_file(self, file_path):
@@ -212,7 +214,8 @@ Example:
         file_name = file_path.split("/")[-1]            # Get the file name
 
         # Get all files in the directory
-        contents = self.github_tool.github_repo_instance.get_contents(directory or "")
+        contents = self.github_tool.github_repo_instance.get_contents(
+            directory or "", ref=self.github_tool.active_branch)
    
         for content_file in contents:
             if content_file.name.lower() == file_name.lower():
@@ -232,8 +235,13 @@ Example:
         Returns:
             str: A success or failure message
         """
+        
+        check_format = self._validate_filepath_format(file_query)
+        if check_format is not None:
+            return check_format
+        
         action = self.github_tool.create_file(file_query)
-        print(action)
+        # print(action)
         return action
         
     def update_file(self, file_query):
@@ -255,6 +263,10 @@ Example:
         Returns:
             A success or failure message
         """
+        
+        check_format = self._validate_filepath_format(file_query)
+        if check_format is not None:
+            return check_format
 
         # Regex to detect cases where the file path is immediately followed by "OLD <<<<"
         pattern = r"([a-zA-Z0-9_/.-]+)(?<!\n) (OLD <<<<)"
@@ -263,7 +275,7 @@ Example:
         fixed_output = re.sub(pattern, r"\1\n\2", file_query)
     
         action = self.github_tool.update_file(fixed_output)
-        print(action)
+        # print(action)
         return action
     
     def replace_file(self, file_query):
@@ -277,6 +289,11 @@ Example:
         Returns:
             str: A success or failure message
         """
+        
+        check_format = self._validate_filepath_format(file_query)
+        if check_format is not None:
+            return check_format
+        
         file_path: str = file_query.split("\n", 1)[0]
         file_content: str = file_query.split("\n", 1)[-1]
         action = self.github_tool.github_repo_instance.update_file(
@@ -288,7 +305,7 @@ Example:
                 file_path, ref=self.github_tool.active_branch
             ).sha,
         )
-        print(action)
+        # print(action)
         return action
         
     def delete_file(self, file_path):
@@ -300,7 +317,7 @@ Example:
             str: Success or failure message
         """
         action = self.github_tool.delete_file(file_path)
-        print(action)
+        # print(action)
         return action
 
     def create_branch(self, proposed_branch_name):
@@ -314,7 +331,7 @@ Example:
             str: A plaintext success message.
         """
         action = self.github_tool.create_branch(proposed_branch_name)
-        print(action)
+        # print(action)
         return action
 
     def _read_and_store(self, file_path, branch="main"):
@@ -335,11 +352,13 @@ Example:
         if file_path:
             self._read_and_store(file_path, branch=branch)
         else:
-            contents = self.github_tool.github_repo_instance.get_contents("")
+            contents = self.github_tool.github_repo_instance.get_contents("", ref=self.github_tool.active_branch)
             while contents:
                 file_path = contents.pop(0)
                 if file_path.type == "dir":
-                    contents.extend(self.github_tool.github_repo_instance.get_contents(file_path.path))
+                    contents.extend(
+                        self.github_tool.github_repo_instance.get_contents(
+                            file_path.path, ref=self.github_tool.active_branch))
                 else:
                     self._read_and_store(file_path, branch=branch)
         
@@ -361,16 +380,45 @@ Example:
             file_name = file_path.split("/")[-1]            # Get the file name
 
             # Get all files in the directory
-            contents = self.github_tool.github_repo_instance.get_contents(directory or "")
+            contents = self.github_tool.github_repo_instance.get_contents(
+                directory or "", ref=self.github_tool.active_branch)
         else:
             # Get all files
-            contents = self.github_tool.github_repo_instance.get_contents("")
+            contents = self.github_tool.github_repo_instance.get_contents(
+                "", ref=self.github_tool.active_branch)
             
         while contents:
             file_path = contents.pop(0)
             if file_path.type == "dir":
-                contents.extend(self.github_tool.github_repo_instance.get_contents(file_path.path))
+                contents.extend(
+                    self.github_tool.github_repo_instance.get_contents(
+                        file_path.path, ref=self.github_tool.active_branch))
             else:
                 files.append(file_path.path)
         
         return json.dumps(files)
+
+    def _validate_filepath_format(self, text: str) -> None | str:
+        """
+        Checks if the given text starts with a valid filepath and ensures it ends with a newline (\n).
+
+        Returns:
+        - False if the text does not start with a valid filepath.
+        - "Filepath does not end with a newline." if a filepath is detected but is not followed by \n.
+        - True if the filepath is correctly formatted.
+        """
+        # Regex pattern for a valid filepath (handles Windows and Unix paths)
+        filepath_pattern = re.compile(r"^([a-zA-Z]:\\[^\n\r]+|\/[^ \n\r]+)")
+
+        match = filepath_pattern.match(text)
+
+        if not match:
+            return "Incorrect call format, no valid filepath at the start."  # No valid filepath at the start
+
+        filepath = match.group(0)  # Extract matched filepath
+
+        # Check if the filepath is immediately followed by a newline
+        if not text.startswith(filepath + "\n"):
+            return "Incorrect call format, the filepath does not end with a newline (\n)."
+
+        return None

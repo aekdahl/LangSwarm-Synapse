@@ -22,7 +22,7 @@ class ToolRegistry:
         self.tools = {}
         self.embeddings = {}
 
-    def register_tool(self, tool_name: str, tool):
+    def register_tool(self, tool):
         """
         Register a new tool and generate its embedding.
 
@@ -31,6 +31,7 @@ class ToolRegistry:
                            It must have a `description` attribute.
         :raises ValueError: If the tool is already registered or lacks a description.
         """
+        tool_name = tool.identifier
         if tool_name in self.tools:
             raise ValueError(f"Tool '{tool_name}' is already registered.")
         if not hasattr(tool, "description"):

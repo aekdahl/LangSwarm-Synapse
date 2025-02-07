@@ -6,7 +6,8 @@ class TaskListTool(BaseTool):
     A quick in-memory task list that optionally stores tasks in a vector database.
     """
 
-    def __init__(self):
+    def __init__(self, identifier):
+        self.identifier = identifier
         super().__init__(
             name="TaskListTool",
             description="""Use the TaskListTool to manage tasks in a simple in-memory list. It is useful for breaking down projects into small tasks, tracking progress, or coordinating multiple subtasks in a structured manner.""",
