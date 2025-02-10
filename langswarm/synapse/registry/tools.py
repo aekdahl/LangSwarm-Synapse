@@ -16,8 +16,6 @@ class ToolRegistry:
         :param embedding_model: A callable that generates embeddings for a given text.
                                 Defaults to SentenceTransformer's 'all-MiniLM-L6-v2'.
         """
-        # Use the provided embedding model or load the default one
-        self.included_tools = set()  # Tracks tools already introduced
         self.embedding_model = embedding_model or SentenceTransformer('all-MiniLM-L6-v2').encode
         self.tools = {}
         self.embeddings = {}
@@ -61,9 +59,9 @@ class ToolRegistry:
         """
         List all registered tools.
 
-        :return: A list of tool names.
+        :return: A list of tool names and briefs.
         """
-        return list(self.tools.keys())
+        return [f"{k} - {v['brief']}" for k, v in self.tools.items()]
 
     def remove_tool(self, tool_name: str):
         """
@@ -85,6 +83,12 @@ class ToolRegistry:
         :param top_k: Number of top results to return.
         :return: A list of matching tools, sorted by similarity score.
         """
+        # Check if query is a single word and exists in tools
+        if query.isalnum() and query in self.tools:
+            tool = self.tools.get(query)
+            if tool:
+                return [{"name": query, "description": tool.description, "instruction": tool.instruction}]
+
         query_embedding = self.embedding_model(query)
         tool_names = list(self.embeddings.keys())
         tool_embeddings = np.array([self.embeddings[name] for name in tool_names])
@@ -93,9 +97,6 @@ class ToolRegistry:
         similarities = cosine_similarity([query_embedding], tool_embeddings)[0]
         ranked_indices = np.argsort(similarities)[::-1][:top_k]
 
-        # Mark these tools as included
-        self.included_tools.update([tool_names[i] for i in ranked_indices])
-        
         return [
             {
                 "name": tool_names[i],
@@ -105,10 +106,3 @@ class ToolRegistry:
             }
             for i in ranked_indices
         ]
-
-    def reset_context(self):
-        """
-        Reset the included tools, clearing the context.
-        """
-        self.included_tools.clear()
-        print("Context reset: All included tools cleared.")

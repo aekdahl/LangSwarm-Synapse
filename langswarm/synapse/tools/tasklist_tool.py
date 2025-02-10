@@ -7,16 +7,20 @@ class TaskListTool(BaseTool):
 
     def __init__(self, identifier, adapter=None):
         self.identifier = identifier
+        self.brief = (
+            f"{identifier} is a task list tool to manage tasks and projects. "
+        )
         self.adapter = adapter  # Optional adapter for storing tasks in a vector database
         super().__init__(
             name="TaskListTool",
-            description="""Use the TaskListTool to manage tasks in a simple in-memory list. It is useful for breaking down projects into small tasks, tracking progress, or coordinating multiple subtasks in a structured manner.""",
+            description="""Use the TaskListTool to manage tasks. It is useful for breaking down projects into small tasks, tracking progress, or coordinating multiple subtasks in a structured manner.""",
             instruction="""
 - **Actions and Parameters**:
     - `create_task`: Create a new task.
       - Parameters:
         - `description` (str): The text describing what needs to be done.
         - `priority` (int): The priority of the task (lower numbers indicate higher priority).
+        - `notes` (str | optional): A new note if you want to add something.
         
     - `update_task`: Update the status or the description of the task.
       - Parameters:
@@ -24,6 +28,7 @@ class TaskListTool(BaseTool):
         - `description` (str | optional): A new description if you want to change it.
         - `completed` (bool | optional): Set to true or false to mark a task as finished or not.
         - `priority` (int | optional): Update the task's priority.
+        - `notes` (str | optional): A new note if you want to change it.
 
     - `delete_task`: Delete a task.
       - Parameters:
@@ -62,6 +67,7 @@ Example:
                 "description": task["text"],
                 "completed": task.get("completed", False),
                 "priority": task.get("priority", 1)  # Default priority if not set
+                "notes": task.get("notes", "")
             }
             self.next_id = max(self.next_id, int(task["key"].split("-")[1]) + 1)
 
@@ -98,7 +104,9 @@ Example:
             "task_id": task_id,
             "description": description,
             "completed": False,
-            "priority": priority
+            "priority": priority,
+            "identifier": self.identifier,
+            "notes": ""
         }
         self.tasks[task_id] = task_data
 
@@ -110,7 +118,8 @@ Example:
                 "metadata": {
                     "completed": False,
                     "priority": priority,
-                    "identifier": self.identifier
+                    "identifier": self.identifier,
+                    "notes": ""
                 }
             }])
 
@@ -126,7 +135,7 @@ Example:
             return None
 
         for key, value in kwargs.items():
-            if key in ["description", "completed", "priority"]:
+            if key in ["description", "completed", "priority", "notes"]:
                 task[key] = value
 
         # Update the task in the adapter if provided
@@ -137,7 +146,8 @@ Example:
                 "metadata": {
                     "completed": task["completed"],
                     "priority": task["priority"],
-                    "identifier": self.identifier
+                    "identifier": self.identifier,
+                    "notes": ""
                 }
             })
 
@@ -155,6 +165,8 @@ Example:
         Delete a task from memory and optionally from the vector DB.
         Returns True if deleted, False if not found.
         """
+        # ToDo: Delete task from db as well
+
         if task_id in self.tasks:
             del self.tasks[task_id]
             return "Task deleted."

@@ -32,6 +32,10 @@ class GitHubTool(BaseTool):
         adapter: Optional[Type[DatabaseAdapter]] = None
     ):
         self.identifier = identifier
+        self.brief = (
+            f"Interact with the GitHub repository `{github_repository.split('/')[-1]}`, "
+            f"owned by `{github_repository.split('/')[0]}`."
+        )
             
         if adapter is not None and not isinstance(adapter, DatabaseAdapter):
             raise TypeError(
