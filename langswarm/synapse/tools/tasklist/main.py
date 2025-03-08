@@ -1,55 +1,38 @@
-from .base import BaseTool
+
+import inspect
+from typing import Type, Optional, List
+
+from langswarm.memory.adapters.database_adapter import DatabaseAdapter
+from ..base import BaseTool
+from .config import ToolSettings
 
 class TaskListTool(BaseTool):
     """
     A quick in-memory task list that optionally stores tasks in a vector database.
     """
 
-    def __init__(self, identifier, adapter=None):
+    def __init__(
+        self, 
+        identifier, 
+        adapter: Optional[Type[DatabaseAdapter]] = None
+    ):
         self.identifier = identifier
         self.brief = (
             f"{identifier} is a task list tool to manage tasks and projects. "
+            f"Use the help action to get instructions: execute_tool:{identifier}|help|"+"{}"
         )
-        self.adapter = adapter  # Optional adapter for storing tasks in a vector database
+        
+        if adapter is not None and not isinstance(adapter, DatabaseAdapter):
+            raise TypeError(
+                f"Argument 'adapter' must be a subclass of DatabaseAdapter if provided, got {type(adapter).__name__}")
+
         super().__init__(
             name="TaskListTool",
             description="""Use the TaskListTool to manage tasks. It is useful for breaking down projects into small tasks, tracking progress, or coordinating multiple subtasks in a structured manner.""",
-            instruction="""
-- **Actions and Parameters**:
-    - `create_task`: Create a new task.
-      - Parameters:
-        - `description` (str): The text describing what needs to be done.
-        - `priority` (int): The priority of the task (lower numbers indicate higher priority).
-        - `notes` (str | optional): A new note if you want to add something.
-        
-    - `update_task`: Update the status or the description of the task.
-      - Parameters:
-        - `task_id` (str): The identifier of the task to update.
-        - `description` (str | optional): A new description if you want to change it.
-        - `completed` (bool | optional): Set to true or false to mark a task as finished or not.
-        - `priority` (int | optional): Update the task's priority.
-        - `notes` (str | optional): A new note if you want to change it.
-
-    - `delete_task`: Delete a task.
-      - Parameters:
-        - `task_id` (str): The identifier of the task to delete.
-
-    - `list_tasks`: List all tasks.
-      - No parameters required
-        
-- **Agent query format**:
-  ```
-  use tool:name|action|{"param1": "value1", "param2": "value2"}
-  ```
-  Replace `name`, `action` and parameters as needed.
-
-Example:
-- To create a new task:
-  ```
-  use tool:task_list|create_task|{"description": "Add docstring to function xyz", "priority": 1}
-  ```
-        """
+            instruction=ToolSettings.instructions
         )
+        
+        self.adapter = adapter  # Optional adapter for storing tasks in a vector database
         self.tasks = {}  # in-memory store, {task_id: {"description": str, "completed": bool, "priority": int, ...}}
         self.next_id = 1
         
@@ -66,10 +49,29 @@ Example:
             self.tasks[task["key"]] = {
                 "description": task["text"],
                 "completed": task.get("completed", False),
-                "priority": task.get("priority", 1)  # Default priority if not set
+                "priority": task.get("priority", 1), # Default priority if not set
                 "notes": task.get("notes", "")
             }
             self.next_id = max(self.next_id, int(task["key"].split("-")[1]) + 1)
+    
+    def _safe_call(self, func, *args, **kwargs):
+        """Safely calls a function and detects incorrect arguments."""
+        # ToDo: Now it returns if any argument is invalid, it should only return if
+        # required arguments are missing, else we just skip invalid ones.
+
+        func_signature = inspect.signature(func)
+        accepted_args = func_signature.parameters.keys()  # Valid argument names
+
+        # Separate valid and invalid arguments
+        valid_kwargs = {k: v for k, v in kwargs.items() if k in accepted_args}
+        invalid_kwargs = {k: v for k, v in kwargs.items() if k not in accepted_args}
+
+        # If there are invalid arguments, return an error message instead of calling
+        if invalid_kwargs:
+            return f"Error: Unexpected arguments {list(invalid_kwargs.keys())}. Expected: {list(accepted_args)}"
+
+        # Call the function with only valid arguments
+        return func(*args, **valid_kwargs)
 
     def run(self, payload={}, action="list_tasks"):
         """
@@ -78,17 +80,22 @@ Example:
         :param action: str - The action to perform.
         :return: str or List[str] - The result of the action.
         """
-        if action == "create_task":
-            return self.create_task(**payload)
-        elif action == "update_task":
-            return self.update_task(**payload)
-        elif action == "list_tasks":
-            return self.list_tasks(**payload)
-        elif action == "delete_task":
-            return self.delete_task(**payload)
+        
+        # Map actions to corresponding functions
+        action_map = {
+            "help": self._help,
+            "create_task": self.create_task,
+            "update_task": self.update_task,
+            "list_tasks": self.list_tasks,
+            "delete_task": self.delete_task
+        }
+
+        # Execute the corresponding action
+        if action in action_map: 
+            return self._safe_call(action_map[action], **payload)
         else:
             return (
-                f"Unsupported action: {action}. Available actions are:  "
+                f"Unsupported action: {action}. Available actions are:\n\n"
                 f"{self.instruction}"
             )
 
@@ -171,3 +178,6 @@ Example:
             del self.tasks[task_id]
             return "Task deleted."
         return "The task was not found."
+    
+    def _help(self):
+        return self.instruction

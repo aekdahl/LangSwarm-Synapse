@@ -61,7 +61,7 @@ class ToolRegistry:
 
         :return: A list of tool names and briefs.
         """
-        return [f"{k} - {v['brief']}" for k, v in self.tools.items()]
+        return [f"{k} - {v.brief}" for k, v in self.tools.items()]
 
     def remove_tool(self, tool_name: str):
         """

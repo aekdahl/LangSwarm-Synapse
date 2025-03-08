@@ -12,7 +12,7 @@ from langswarm.synapse.swarm.consensus import LLMConsensus
 
 class LangSwarmConsensusTool(Tool):
     class Config:
-      extra = Extra.allow
+        extra = Extra.allow
         
     def __init__(self, agents, **kwargs):
         """

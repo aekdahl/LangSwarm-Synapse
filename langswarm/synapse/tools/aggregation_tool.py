@@ -13,7 +13,7 @@ from langswarm.synapse.swarm.aggregation import LLMAggregation
 
 class LangSwarmAggregationTool(Tool):
     class Config:
-      extra = Extra.allow
+        extra = Extra.allow
         
     def __init__(self, agents, **kwargs):
         """

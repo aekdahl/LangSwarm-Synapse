@@ -12,7 +12,7 @@ from langswarm.synapse.swarm.routing import LLMRouting
 
 class LangSwarmRoutingTool(Tool):
     class Config:
-      extra = Extra.allow
+        extra = Extra.allow
         
     def __init__(self, route, bots, main_bot, **kwargs):
         """
